@@ -18,6 +18,7 @@
     name: "Map",
     data() {
       return {
+        e: null,
         center: [51.505, -0.09],
         mapDiv: null,
         line: "",
@@ -68,6 +69,12 @@
                 clickable: false,
               },
             },
+            // circlemarker: {
+            //   shapeOptions: {
+            //     color: "#f357a1",
+            //     weight: 10,
+            //   },
+            // },
           },
           edit: {
             featureGroup: drawnItems,
@@ -85,41 +92,32 @@
               color: "#0000FF",
             },
           },
-          simpleShape: {
-            shapeOptions: {
-              color: "#f357a1",
-              weight: 10,
-            },
-          },
+          // simpleShape: {
+          //   shapeOptions: {
+          //     color: "#f357a1",
+          //     weight: 10,
+          //   },
+          // },
         });
         this.mapDiv.on("click", (e) => {
-          if (!this.drawing) {
-            this.drawing = true;
-            this.line = L.polyline([]).addTo(this.mapDiv);
-            this.line.addLatLng(e.latlng);
-            console.log("ADDED LINE");
-            this.line.setStyle({
-              "color": "#fc032c",
-              "opacity": 0.4,
-              "weight": 8,
-            });
-          } else {
-            this.drawing = false;
-            this.mapDiv.touchZoom.enable();
-            this.mapDiv.doubleClickZoom.enable();
-            this.mapDiv.scrollWheelZoom.enable();
-            this.mapDiv.boxZoom.enable();
-            this.mapDiv.keyboard.enable();
-            console.log("Closed line", this.line);
+          this.e = e;
+          if (this.drawing) {
+            this.stop_freehand();
           }
         });
 
-        this.mapDiv.on(L.Draw.Event.CREATED, function(e) {
+        this.mapDiv.on(L.Draw.Event.CREATED, (e) => {
+          this.e = null;
+
           var type = e.layerType,
             layer = e.layer;
 
           if (type === "marker") {
             layer.bindPopup("A popup!");
+          }
+          if (type === "circlemarker") {
+            // this.drawing = true;
+            this.freehand_draw(e);
           }
 
           editableLayers.addLayer(layer);
@@ -162,6 +160,30 @@
             setTimeout(() => (inThrottle = false), limit);
           }
         };
+      },
+      freehand_draw(e) {
+        if (!this.drawing) {
+          this.drawing = true;
+          this.line = L.polyline([]).addTo(this.mapDiv);
+          this.line.addLatLng(this.e.latlng);
+          console.log("ADDED LINE");
+          this.line.setStyle({
+            "color": "#fc032c",
+            "opacity": 0.4,
+            "weight": 8,
+          });
+        } else {
+          this.stop_freehand();
+        }
+      },
+      stop_freehand() {
+        this.drawing = false;
+        this.mapDiv.touchZoom.enable();
+        this.mapDiv.doubleClickZoom.enable();
+        this.mapDiv.scrollWheelZoom.enable();
+        this.mapDiv.boxZoom.enable();
+        this.mapDiv.keyboard.enable();
+        console.log("Closed line", this.line);
       },
     },
   };
