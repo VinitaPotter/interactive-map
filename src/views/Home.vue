@@ -32,7 +32,7 @@
     methods: {
       setupLeafletMap: function() {
         // this.mapDiv = L.map("mapContainer").setView(this.center, 13);
-        this.mapDiv = L.map("mapContainer", { dragging: !L.Browser.mobile, tap: !L.Browser.mobile }).fitWorld();
+        this.mapDiv = L.map("mapContainer").fitWorld();
         L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${this.accessToken}`).addTo(this.mapDiv);
         this.mapDiv.locate({ setView: true, maxZoom: 16 });
 
@@ -100,12 +100,46 @@
           // },
         });
         this.mapDiv.on("click", (e) => {
-          this.e = e;
-          if (this.drawing) {
+          if (!L.Browser.mobile) {
+            console.log("clicked");
+            this.e = null;
+            this.e = e;
+            if (this.drawing) {
+              this.stop_freehand();
+            }
+          }
+        });
+        this.mapDiv.on("touchstart", (e) => {
+          if (L.Browser.mobile) {
+            console.log("touchstart", e);
+            // this.mapDiv.dragging.disable();
+            this.e = null;
+            this.e = e;
+            this.freehand_draw(e);
+            // this.drawLine(e);
+          }
+        });
+        this.mapDiv.on("touchmove", (e) => {
+          if (L.Browser.mobile) {
+            this.e = e;
+            this.drawLine(e);
+            console.log("touchmove", e);
+            this.mapDiv.dragging.disable();
+            // this.e = null;
+            // this.freehand_draw(e);
+          }
+        });
+        this.mapDiv.on("touchend", (e) => {
+          console.log("touchend");
+          if (L.Browser.mobile) {
+            this.e = null;
+            this.mapDiv.dragging.enable();
             this.stop_freehand();
           }
         });
-
+        this.mapDiv.on("touchcancel", (e) => {
+          console.log("touchcancel");
+        });
         this.mapDiv.on(L.Draw.Event.CREATED, (e) => {
           this.e = null;
 
@@ -117,12 +151,14 @@
           }
           if (type === "circlemarker") {
             // this.drawing = true;
+
             this.freehand_draw(e);
           }
 
           editableLayers.addLayer(layer);
         });
         this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
+        // this.mapDiv.on("mousemove", this.drawLine);
       },
       onLocationFound(e) {
         var radius = e.accuracy;
@@ -169,8 +205,8 @@
           console.log("ADDED LINE");
           this.line.setStyle({
             "color": "#fc032c",
-            "opacity": 0.4,
-            "weight": 8,
+            "opacity": 1,
+            "weight": 10,
           });
         } else {
           this.stop_freehand();
