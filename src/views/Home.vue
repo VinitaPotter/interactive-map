@@ -28,8 +28,13 @@
     },
     methods: {
       setupLeafletMap: function() {
-        this.mapDiv = L.map("mapContainer").setView(this.center, 13);
+        // this.mapDiv = L.map("mapContainer").setView(this.center, 13);
+        this.mapDiv = L.map("mapContainer").fitWorld();
         L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${this.accessToken}`).addTo(this.mapDiv);
+        this.mapDiv.locate({ setView: true, maxZoom: 16 });
+
+        this.mapDiv.on("locationfound", this.onLocationFound);
+        this.mapDiv.on("locationerror", this.onLocationError);
 
         var editableLayers = new L.FeatureGroup();
         this.mapDiv.addLayer(editableLayers);
@@ -95,6 +100,20 @@
 
           editableLayers.addLayer(layer);
         });
+      },
+      onLocationFound(e) {
+        var radius = e.accuracy;
+
+        L.marker(e.latlng)
+          .addTo(this.mapDiv)
+          .bindPopup("You are within " + radius + " meters from this point")
+          .openPopup();
+
+        L.circle(e.latlng, radius).addTo(this.mapDiv);
+      },
+      onLocationError(e) {
+        alert(e.message);
+        this.mapDiv.setView(this.center, 13);
       },
     },
   };
