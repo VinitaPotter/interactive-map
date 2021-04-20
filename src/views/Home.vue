@@ -101,45 +101,47 @@
         });
         this.mapDiv.on("click", (e) => {
           if (!L.Browser.mobile) {
-            console.log("clicked");
             this.e = null;
             this.e = e;
-            if (this.drawing) {
-              this.stop_freehand();
-            }
+            this.freehand_draw();
+            // if (this.drawing) {
+            //   this.stop_freehand();
+            //   // } else {
+            // }
           }
         });
         this.mapDiv.on("touchstart", (e) => {
           if (L.Browser.mobile) {
             console.log("touchstart", e);
-            // this.mapDiv.dragging.disable();
-            this.e = null;
+            // this.e = null;
             this.e = e;
-            this.freehand_draw(e);
-            // this.drawLine(e);
+            // this.drawing = !this.drawing;
+            this.freehand_draw();
           }
         });
         this.mapDiv.on("touchmove", (e) => {
           if (L.Browser.mobile) {
             this.e = e;
             this.drawLine(e);
-            console.log("touchmove", e);
-            this.mapDiv.dragging.disable();
+            if (this.drawing) {
+              this.mapDiv.dragging.disable();
+            }
+            // console.log("touchmove", e);
             // this.e = null;
             // this.freehand_draw(e);
           }
         });
-        this.mapDiv.on("touchend", (e) => {
-          console.log("touchend");
-          if (L.Browser.mobile) {
-            this.e = null;
-            this.mapDiv.dragging.enable();
-            this.stop_freehand();
-          }
-        });
-        this.mapDiv.on("touchcancel", (e) => {
-          console.log("touchcancel");
-        });
+        // this.mapDiv.on("touchend", (e) => {
+        //   console.log("touchend");
+        //   if (L.Browser.mobile) {
+        //     this.e = null;
+        //     this.mapDiv.dragging.enable();
+        //     this.stop_freehand();
+        //   }
+        // });
+        // this.mapDiv.on("touchcancel", (e) => {
+        //   console.log("touchcancel");
+        // });
         this.mapDiv.on(L.Draw.Event.CREATED, (e) => {
           this.e = null;
 
@@ -157,8 +159,11 @@
 
           editableLayers.addLayer(layer);
         });
-        this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
+        // this.mapDiv.on("mousemove", (e) => {
+        //   this.throttle(this.drawLine(e), 25);
+        // });
         // this.mapDiv.on("mousemove", this.drawLine);
+        this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
       },
       onLocationFound(e) {
         var radius = e.accuracy;
@@ -203,17 +208,18 @@
           this.line = L.polyline([]).addTo(this.mapDiv);
           this.line.addLatLng(this.e.latlng);
           console.log("ADDED LINE");
-          this.line.setStyle({
-            "color": "#fc032c",
-            "opacity": 1,
-            "weight": 10,
-          });
+          // this.line.setStyle({
+          //   "color": "#fc032c",
+          //   "opacity": 1,
+          //   "weight": 10,
+          // });
         } else {
           this.stop_freehand();
         }
       },
       stop_freehand() {
         this.drawing = false;
+        this.mapDiv.dragging.enable();
         this.mapDiv.touchZoom.enable();
         this.mapDiv.doubleClickZoom.enable();
         this.mapDiv.scrollWheelZoom.enable();
