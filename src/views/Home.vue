@@ -20,6 +20,8 @@
       return {
         center: [51.505, -0.09],
         mapDiv: null,
+        line: "",
+        drawing: false,
         accessToken: "pk.eyJ1IjoidGVzdGVyMjM4Nzg2MjciLCJhIjoiY2tub2k2OWFrMHlxcDJ2bzVnbm5na213cyJ9.gpHnP345S2_zJHsj_Zx46A",
       };
     },
@@ -29,7 +31,7 @@
     methods: {
       setupLeafletMap: function() {
         // this.mapDiv = L.map("mapContainer").setView(this.center, 13);
-        this.mapDiv = L.map("mapContainer").fitWorld();
+        this.mapDiv = L.map("mapContainer", { dragging: !L.Browser.mobile, tap: !L.Browser.mobile }).fitWorld();
         L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${this.accessToken}`).addTo(this.mapDiv);
         this.mapDiv.locate({ setView: true, maxZoom: 16 });
 
@@ -49,7 +51,6 @@
                 weight: 10,
               },
             },
-            simpleshape: true,
 
             polygon: {
               allowIntersection: false, // Restricts shapes to simple polygons
@@ -74,6 +75,8 @@
           },
         });
 
+        // var drawControl = new L.Control.Draw();
+
         this.mapDiv.addControl(drawControl);
 
         drawControl.setDrawingOptions({
@@ -89,6 +92,27 @@
             },
           },
         });
+        this.mapDiv.on("click", (e) => {
+          if (!this.drawing) {
+            this.drawing = true;
+            this.line = L.polyline([]).addTo(this.mapDiv);
+            this.line.addLatLng(e.latlng);
+            console.log("ADDED LINE");
+            this.line.setStyle({
+              "color": "#fc032c",
+              "opacity": 0.4,
+              "weight": 8,
+            });
+          } else {
+            this.drawing = false;
+            this.mapDiv.touchZoom.enable();
+            this.mapDiv.doubleClickZoom.enable();
+            this.mapDiv.scrollWheelZoom.enable();
+            this.mapDiv.boxZoom.enable();
+            this.mapDiv.keyboard.enable();
+            console.log("Closed line", this.line);
+          }
+        });
 
         this.mapDiv.on(L.Draw.Event.CREATED, function(e) {
           var type = e.layerType,
@@ -100,6 +124,7 @@
 
           editableLayers.addLayer(layer);
         });
+        this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
       },
       onLocationFound(e) {
         var radius = e.accuracy;
@@ -115,6 +140,29 @@
         alert(e.message);
         this.mapDiv.setView(this.center, 13);
       },
+      drawLine(e) {
+        if (this.drawing) {
+          console.log("drawing..");
+          this.mapDiv.touchZoom.disable();
+          this.mapDiv.doubleClickZoom.disable();
+          this.mapDiv.scrollWheelZoom.disable();
+          this.mapDiv.boxZoom.disable();
+          this.mapDiv.keyboard.disable();
+          this.line.addLatLng(e.latlng);
+        }
+      },
+      throttle(func, limit) {
+        let inThrottle;
+        return function() {
+          const args = arguments;
+          const context = this;
+          if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => (inThrottle = false), limit);
+          }
+        };
+      },
     },
   };
 </script>
@@ -124,6 +172,7 @@
   #mapContainer {
     width: 100vw;
     height: 80vh;
+    cursor: url("~@/assets/pen.svg"), crosshair !important;
     @media only screen and (max-width: 600px) {
       body {
         height: 100vh;
