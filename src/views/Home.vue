@@ -6,8 +6,12 @@
 
 <script>
   import "leaflet/dist/leaflet.css";
+  import "leaflet-draw/dist/leaflet.draw.css";
+
   import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"; // Re-uses images from ~leaflet package
+
   import * as L from "leaflet";
+  import "leaflet-draw";
   import "leaflet-defaulticon-compatibility";
 
   export default {
@@ -27,21 +31,70 @@
         this.mapDiv = L.map("mapContainer").setView(this.center, 13);
         L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${this.accessToken}`).addTo(this.mapDiv);
 
-        var marker = L.marker([51.5, -0.09]).addTo(this.mapDiv);
-        var polygon = L.polygon([
-          [51.509, -0.08],
-          [51.503, -0.06],
-          [51.51, -0.047],
-        ]).addTo(this.mapDiv);
-        this.mapDiv.on("click", this.onMapClick);
-      },
+        var editableLayers = new L.FeatureGroup();
+        this.mapDiv.addLayer(editableLayers);
+        var drawnItems = new L.FeatureGroup();
+        this.mapDiv.addLayer(drawnItems);
 
-      onMapClick(e) {
-        var popup = L.popup();
-        popup
-          .setLatLng(e.latlng)
-          .setContent("You clicked the map at " + e.latlng.toString())
-          .openOn(this.mapDiv);
+        var drawControl = new L.Control.Draw({
+          draw: {
+            polyline: {
+              shapeOptions: {
+                color: "#f357a1",
+                weight: 10,
+              },
+            },
+            simpleshape: true,
+
+            polygon: {
+              allowIntersection: false, // Restricts shapes to simple polygons
+              drawError: {
+                color: "#e1e100", // Color the shape will turn when intersects
+                message: "<strong>Polygon draw does not allow intersections!<strong> (allowIntersection: false)", // Message that will show when intersect
+              },
+              shapeOptions: {
+                color: "#bada55",
+              },
+            },
+            circle: true, // Turns off this drawing tool
+            rectangle: {
+              shapeOptions: {
+                clickable: false,
+              },
+            },
+          },
+          edit: {
+            featureGroup: drawnItems,
+            remove: false,
+          },
+        });
+
+        this.mapDiv.addControl(drawControl);
+
+        drawControl.setDrawingOptions({
+          rectangle: {
+            shapeOptions: {
+              color: "#0000FF",
+            },
+          },
+          simpleShape: {
+            shapeOptions: {
+              color: "#f357a1",
+              weight: 10,
+            },
+          },
+        });
+
+        this.mapDiv.on(L.Draw.Event.CREATED, function(e) {
+          var type = e.layerType,
+            layer = e.layer;
+
+          if (type === "marker") {
+            layer.bindPopup("A popup!");
+          }
+
+          editableLayers.addLayer(layer);
+        });
       },
     },
   };
