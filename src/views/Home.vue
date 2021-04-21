@@ -1,6 +1,14 @@
 <template>
   <div>
     <div id="mapContainer"></div>
+    <input
+      type="text"
+      class="input"
+      v-if="prompt"
+      :style="{ 'top': e.containerPoint.y + 'px', 'left': e.containerPoint.x + 'px' }"
+      @keyup.enter="add_text_to_map"
+      v-model="text"
+    />
   </div>
 </template>
 
@@ -17,6 +25,8 @@
     name: "Map",
     data() {
       return {
+        text: "",
+        prompt: false,
         e: null,
         center: [51.505, -0.09],
         mapDiv: null,
@@ -43,19 +53,16 @@
         var drawnItems = new L.FeatureGroup();
         this.mapDiv.addLayer(drawnItems);
 
-        L.Draw.MarkerA = L.Draw.Marker.extend({
+        L.Draw.Text = L.Draw.Marker.extend({
           initialize: function(map, options) {
-            this.type = "A";
+            console.log(map, options);
+            this.type = "Text";
 
             L.Draw.Feature.prototype.initialize.call(this, map, options);
           },
 
-          addHooks: function() {
-            L.Draw.Marker.prototype.addHooks.call(this);
-
-            if (this._map) {
-              this._tooltip.updateContent({ text: "Click map to place restaurant." });
-            }
+          addHooks: () => {
+            this.text_prompt();
           },
         });
 
@@ -78,6 +85,16 @@
           },
           removeHooks: () => {
             this.start_drawing();
+          },
+        });
+        L.Draw.Arrow = L.Draw.Polyline.extend({
+          options: {
+            repeatMode: false,
+          },
+          initialize: function(map, options) {
+            this.type = "arrow";
+
+            L.Draw.Feature.prototype.initialize.call(this, map, options);
           },
         });
 
@@ -106,18 +123,23 @@
                 title: L.drawLocal.draw.toolbar.buttons.circle,
               },
               {
+                enabled: this.options.marker,
+                handler: new L.Draw.Marker(map, this.options.marker),
+                title: L.drawLocal.draw.toolbar.buttons.marker,
+              },
+              {
                 enabled: true,
                 handler: new L.Draw.Freeline(map, { icon: new L.Icon.Default() }),
                 title: "Freeline",
               },
               {
                 enabled: true,
-                handler: new L.Draw.MarkerA(map, { icon: new L.Icon.Default() }),
+                handler: new L.Draw.Text(map, { icon: new L.Icon.Default() }),
                 title: "Text",
               },
               {
                 enabled: true,
-                handler: new L.Draw.Marker(map, { icon: new L.Icon.Default() }),
+                handler: new L.Draw.Arrow(map, this.options.polygon),
                 title: "Arrow",
               },
             ];
@@ -127,6 +149,12 @@
         var drawControl = new L.Control.Draw({
           draw: {
             polyline: {
+              shapeOptions: {
+                color: "#f357a1",
+                weight: 10,
+              },
+            },
+            arrow: {
               shapeOptions: {
                 color: "#f357a1",
                 weight: 10,
@@ -167,13 +195,15 @@
 
         this.mapDiv.on(L.Draw.Event.CREATED, (e) => {
           console.log("CREATED", e);
-
           this.e = null;
 
           var type = e.layerType,
             layer = e.layer;
 
           if (type === "marker") {
+            layer.bindPopup("A popup!");
+          }
+          if (type === "Text") {
             layer.bindPopup("A popup!");
           }
 
@@ -220,6 +250,18 @@
           }
         };
       },
+
+      text_prompt() {
+        this.mapDiv.on("click ", (e) => {
+          console.log(e);
+          this.e = e;
+          this.prompt = true;
+        });
+      },
+      add_text_to_map() {
+        // alert(this.text);
+      },
+
       start_drawing() {
         this.mapDiv.on("click touchstart", (e) => {
           this.e = null;
@@ -262,5 +304,11 @@
         height: 100vh;
       }
     }
+  }
+
+  .input {
+    padding: 1rem;
+    position: absolute;
+    z-index: 1000;
   }
 </style>
