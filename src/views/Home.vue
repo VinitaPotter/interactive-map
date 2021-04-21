@@ -7,7 +7,6 @@
 <script>
   import "leaflet/dist/leaflet.css";
   import "leaflet-draw/dist/leaflet.draw.css";
-
   import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"; // Re-uses images from ~leaflet package
 
   import * as L from "leaflet";
@@ -31,7 +30,6 @@
     },
     methods: {
       setupLeafletMap: function() {
-        // this.mapDiv = L.map("mapContainer").setView(this.center, 13);
         this.mapDiv = L.map("mapContainer").fitWorld();
         L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${this.accessToken}`).addTo(this.mapDiv);
         this.mapDiv.locate({ setView: true, maxZoom: 16 });
@@ -69,20 +67,12 @@
                 clickable: false,
               },
             },
-            // circlemarker: {
-            //   shapeOptions: {
-            //     color: "#f357a1",
-            //     weight: 10,
-            //   },
-            // },
           },
           edit: {
             featureGroup: drawnItems,
             remove: false,
           },
         });
-
-        // var drawControl = new L.Control.Draw();
 
         this.mapDiv.addControl(drawControl);
 
@@ -92,30 +82,18 @@
               color: "#0000FF",
             },
           },
-          // simpleShape: {
-          //   shapeOptions: {
-          //     color: "#f357a1",
-          //     weight: 10,
-          //   },
-          // },
         });
         this.mapDiv.on("click", (e) => {
           if (!L.Browser.mobile) {
             this.e = null;
             this.e = e;
             this.freehand_draw();
-            // if (this.drawing) {
-            //   this.stop_freehand();
-            //   // } else {
-            // }
           }
         });
         this.mapDiv.on("touchstart", (e) => {
           if (L.Browser.mobile) {
             console.log("touchstart", e);
-            // this.e = null;
             this.e = e;
-            // this.drawing = !this.drawing;
             this.freehand_draw();
           }
         });
@@ -126,22 +104,9 @@
             if (this.drawing) {
               this.mapDiv.dragging.disable();
             }
-            // console.log("touchmove", e);
-            // this.e = null;
-            // this.freehand_draw(e);
           }
         });
-        // this.mapDiv.on("touchend", (e) => {
-        //   console.log("touchend");
-        //   if (L.Browser.mobile) {
-        //     this.e = null;
-        //     this.mapDiv.dragging.enable();
-        //     this.stop_freehand();
-        //   }
-        // });
-        // this.mapDiv.on("touchcancel", (e) => {
-        //   console.log("touchcancel");
-        // });
+
         this.mapDiv.on(L.Draw.Event.CREATED, (e) => {
           this.e = null;
 
@@ -152,17 +117,12 @@
             layer.bindPopup("A popup!");
           }
           if (type === "circlemarker") {
-            // this.drawing = true;
-
             this.freehand_draw(e);
           }
 
           editableLayers.addLayer(layer);
         });
-        // this.mapDiv.on("mousemove", (e) => {
-        //   this.throttle(this.drawLine(e), 25);
-        // });
-        // this.mapDiv.on("mousemove", this.drawLine);
+
         this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
       },
       onLocationFound(e) {
@@ -208,11 +168,6 @@
           this.line = L.polyline([]).addTo(this.mapDiv);
           this.line.addLatLng(this.e.latlng);
           console.log("ADDED LINE");
-          // this.line.setStyle({
-          //   "color": "#fc032c",
-          //   "opacity": 1,
-          //   "weight": 10,
-          // });
         } else {
           this.stop_freehand();
         }
@@ -231,7 +186,6 @@
   };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
   #mapContainer {
     width: 100vw;
