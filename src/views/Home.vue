@@ -30,17 +30,99 @@
     },
     methods: {
       setupLeafletMap: function() {
-        this.mapDiv = L.map("mapContainer").fitWorld();
+        // this.mapDiv = L.map("mapContainer").fitWorld();
+        this.mapDiv = L.map("mapContainer").setView(this.center, 13);
         L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${this.accessToken}`).addTo(this.mapDiv);
-        this.mapDiv.locate({ setView: true, maxZoom: 16 });
+        // this.mapDiv.locate({ setView: true, maxZoom: 16 });
 
-        this.mapDiv.on("locationfound", this.onLocationFound);
-        this.mapDiv.on("locationerror", this.onLocationError);
+        // this.mapDiv.on("locationfound", this.onLocationFound);
+        // this.mapDiv.on("locationerror", this.onLocationError);
 
         var editableLayers = new L.FeatureGroup();
         this.mapDiv.addLayer(editableLayers);
         var drawnItems = new L.FeatureGroup();
         this.mapDiv.addLayer(drawnItems);
+
+        L.Draw.MarkerA = L.Draw.Marker.extend({
+          initialize: function(map, options) {
+            this.type = "A";
+
+            L.Draw.Feature.prototype.initialize.call(this, map, options);
+          },
+
+          addHooks: function() {
+            L.Draw.Marker.prototype.addHooks.call(this);
+
+            if (this._map) {
+              this._tooltip.updateContent({ text: "Click map to place restaurant." });
+            }
+          },
+        });
+
+        L.Draw.Freeline = L.Draw.Polyline.extend({
+          options: {
+            repeatMode: false,
+          },
+          initialize: function(map, options) {
+            this.type = "freeline";
+
+            L.Draw.Feature.prototype.initialize.call(this, map, options);
+          },
+
+          addHooks: () => {
+            this.start_drawing();
+
+            if (this._map) {
+              this._tooltip.updateContent({ text: "Click map start drawing custom shape." });
+            }
+          },
+          removeHooks: () => {
+            this.start_drawing();
+          },
+        });
+
+        // Settings custom toolbars before initilising the toolbar
+        L.DrawToolbar.include({
+          getModeHandlers: function(map) {
+            return [
+              {
+                enabled: this.options.polyline,
+                handler: new L.Draw.Polyline(map, this.options.polyline),
+                title: L.drawLocal.draw.toolbar.buttons.polyline,
+              },
+              {
+                enabled: this.options.polygon,
+                handler: new L.Draw.Polygon(map, this.options.polygon),
+                title: L.drawLocal.draw.toolbar.buttons.polygon,
+              },
+              {
+                enabled: this.options.rectangle,
+                handler: new L.Draw.Rectangle(map, this.options.rectangle),
+                title: L.drawLocal.draw.toolbar.buttons.rectangle,
+              },
+              {
+                enabled: this.options.circle,
+                handler: new L.Draw.Circle(map, this.options.circle),
+                title: L.drawLocal.draw.toolbar.buttons.circle,
+              },
+              {
+                enabled: true,
+                handler: new L.Draw.Freeline(map, { icon: new L.Icon.Default() }),
+                title: "Freeline",
+              },
+              {
+                enabled: true,
+                handler: new L.Draw.MarkerA(map, { icon: new L.Icon.Default() }),
+                title: "Text",
+              },
+              {
+                enabled: true,
+                handler: new L.Draw.Marker(map, { icon: new L.Icon.Default() }),
+                title: "Arrow",
+              },
+            ];
+          },
+        });
 
         var drawControl = new L.Control.Draw({
           draw: {
@@ -70,7 +152,6 @@
           },
           edit: {
             featureGroup: drawnItems,
-            remove: false,
           },
         });
 
@@ -83,31 +164,10 @@
             },
           },
         });
-        this.mapDiv.on("click", (e) => {
-          if (!L.Browser.mobile) {
-            this.e = null;
-            this.e = e;
-            this.freehand_draw();
-          }
-        });
-        this.mapDiv.on("touchstart", (e) => {
-          if (L.Browser.mobile) {
-            console.log("touchstart", e);
-            this.e = e;
-            this.freehand_draw();
-          }
-        });
-        this.mapDiv.on("touchmove", (e) => {
-          if (L.Browser.mobile) {
-            this.e = e;
-            this.drawLine(e);
-            if (this.drawing) {
-              this.mapDiv.dragging.disable();
-            }
-          }
-        });
 
         this.mapDiv.on(L.Draw.Event.CREATED, (e) => {
+          console.log("CREATED", e);
+
           this.e = null;
 
           var type = e.layerType,
@@ -115,9 +175,6 @@
 
           if (type === "marker") {
             layer.bindPopup("A popup!");
-          }
-          if (type === "circlemarker") {
-            this.freehand_draw(e);
           }
 
           editableLayers.addLayer(layer);
@@ -143,6 +200,7 @@
         if (this.drawing) {
           console.log("drawing..");
           this.mapDiv.touchZoom.disable();
+          this.mapDiv.dragging.disable();
           this.mapDiv.doubleClickZoom.disable();
           this.mapDiv.scrollWheelZoom.disable();
           this.mapDiv.boxZoom.disable();
@@ -162,9 +220,17 @@
           }
         };
       },
+      start_drawing() {
+        this.mapDiv.on("click touchstart", (e) => {
+          this.e = null;
+          this.e = e;
+          this.freehand_draw();
+        });
+      },
       freehand_draw(e) {
         if (!this.drawing) {
           this.drawing = true;
+
           this.line = L.polyline([]).addTo(this.mapDiv);
           this.line.addLatLng(this.e.latlng);
           console.log("ADDED LINE");
