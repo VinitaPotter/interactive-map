@@ -1,14 +1,6 @@
 <template>
   <div>
     <div id="mapContainer"></div>
-    <input
-      type="text"
-      class="input"
-      v-if="prompt"
-      :style="{ 'top': e.containerPoint.y + 'px', 'left': e.containerPoint.x + 'px' }"
-      @keyup.enter="add_text_to_map"
-      v-model="text"
-    />
   </div>
 </template>
 
@@ -25,7 +17,8 @@
     name: "Map",
     data() {
       return {
-        text: "",
+        popup: null,
+        selected_tool: "",
         prompt: false,
         e: null,
         center: [51.505, -0.09],
@@ -55,13 +48,14 @@
 
         L.Draw.Text = L.Draw.Marker.extend({
           initialize: function(map, options) {
-            console.log(map, options);
             this.type = "Text";
-
             L.Draw.Feature.prototype.initialize.call(this, map, options);
           },
 
           addHooks: () => {
+            this.text_prompt();
+          },
+          removeHooks: () => {
             this.text_prompt();
           },
         });
@@ -193,8 +187,16 @@
           },
         });
 
+        this.mapDiv.on(L.Draw.Event.DRAWSTART, (e) => {
+          console.log(e);
+          this.selected_tool = e.layerType;
+          console.log(this.selected_tool);
+        });
+        this.mapDiv.on(L.Draw.Event.DRAWSTOP, (e) => {
+          this.selected_tool = "";
+        });
+
         this.mapDiv.on(L.Draw.Event.CREATED, (e) => {
-          console.log("CREATED", e);
           this.e = null;
 
           var type = e.layerType,
@@ -204,7 +206,8 @@
             layer.bindPopup("A popup!");
           }
           if (type === "Text") {
-            layer.bindPopup("A popup!");
+            this.mapDiv.bindPopup("<p>Hello World</p>").openPopup();
+            // layer.bindPopup("A popup!");
           }
 
           editableLayers.addLayer(layer);
@@ -258,13 +261,27 @@
 
       text_prompt() {
         this.mapDiv.on("click ", (e) => {
-          console.log(e);
-          this.e = e;
-          this.prompt = true;
+          if (this.selected_tool == "Text") {
+            var myPopup = L.DomUtil.create("div");
+            myPopup.innerHTML =
+              "<div><input class='input' id='value' placeholder='Add text' type='text'/></div><button  id='input-btn' >Submit</button>";
+            this.popup = L.popup({ className: "input" })
+              .setLatLng(e.latlng)
+              .setContent(myPopup)
+              .openOn(this.mapDiv);
+
+            let button = L.DomUtil.get("input-btn");
+            L.DomEvent.addListener(button, "click", () => {
+              let content = L.DomUtil.get("value").value;
+              if (content && content.length) {
+                var marker = new L.marker(e.latlng, { opacity: 0.01 }); //opacity may be set to zero
+                marker.bindTooltip(content, { permanent: true, className: "my-label", offset: [0, 0] });
+                marker.addTo(this.mapDiv);
+              }
+              this.mapDiv.closePopup();
+            });
+          }
         });
-      },
-      add_text_to_map() {
-        // alert(this.text);
       },
 
       start_drawing() {
@@ -318,10 +335,17 @@
       }
     }
   }
+  .leaflet-popup-content {
+    .input {
+      padding: 0.5rem;
+    }
 
-  .input {
-    padding: 1rem;
-    position: absolute;
-    z-index: 1000;
+    #input-btn {
+      background: white;
+      border: 1px solid #ccc;
+      padding: 0.3rem 0.9rem;
+      border-radius: 5px;
+      margin-top: 5px;
+    }
   }
 </style>
