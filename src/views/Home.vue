@@ -37,6 +37,9 @@
     },
     mounted() {
       this.setupLeafletMap();
+      document.getElementById("app").addEventListener("touchend touchcancel", (e) => {
+        alert("touchend clicked");
+      });
     },
     methods: {
       setupLeafletMap: function() {
@@ -211,7 +214,6 @@
         });
 
         this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
-        this.mapDiv.on("touchend touchcancel", alert("ended touch 2"));
       },
       onLocationFound(e) {
         var radius = e.accuracy;
@@ -278,7 +280,6 @@
           });
         }
       },
-
       freehand_draw(e) {
         if (!this.drawing) {
           this.drawing = true;
