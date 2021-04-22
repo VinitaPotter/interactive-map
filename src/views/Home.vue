@@ -7,11 +7,11 @@
 <script>
   import "leaflet/dist/leaflet.css";
   import "leaflet-draw/dist/leaflet.draw.css";
-  import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"; // Re-uses images from ~leaflet package
+  // import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"; // Re-uses images from ~leaflet package
 
   import * as L from "leaflet";
   import "leaflet-draw";
-  import "leaflet-defaulticon-compatibility";
+  // import "leaflet-defaulticon-compatibility";
 
   export default {
     name: "Map",
@@ -92,6 +92,15 @@
           },
         });
 
+        var electricpole = L.Icon.extend({
+          options: {
+            shadowUrl: null,
+            iconAnchor: new L.Point(12, 12),
+            iconSize: new L.Point(30, 30),
+            iconUrl: "images/marker-icon.png",
+          },
+        });
+
         // Settings custom toolbars before initilising the toolbar
         L.DrawToolbar.include({
           getModeHandlers: function(map) {
@@ -123,7 +132,7 @@
               },
               {
                 enabled: true,
-                handler: new L.Draw.Freeline(map, { icon: new L.Icon.Default() }),
+                handler: new L.Draw.Freeline(map, { icon: new electricpole() }),
                 title: "Freeline",
               },
               {
@@ -324,7 +333,7 @@
   };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
   #mapContainer {
     width: 100vw;
     height: 80vh;
@@ -347,5 +356,18 @@
       border-radius: 5px;
       margin-top: 5px;
     }
+  }
+  .leaflet-draw-draw-freeline {
+    background-position: 100% !important;
+  }
+  .leaflet-draw-draw-arrow {
+    background-position: unset !important;
+    // background: url("~@/assets/pen.svg") no-repeat !important;
+    // background-color: #fff !important;
+  }
+  .leaflet-draw-draw-Text {
+    background-position: 55% !important;
+    // background: url("~@/assets/text.jpg") no-repeat !important;
+    // background-color: #fff !important;
   }
 </style>
