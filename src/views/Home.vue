@@ -37,7 +37,7 @@
     },
     mounted() {
       this.setupLeafletMap();
-      document.getElementById("app").addEventListener("click", (e) => {
+      document.getElementById("app").addEventListener("touchend", (e) => {
         alert("touchend");
       });
     },
