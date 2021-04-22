@@ -37,9 +37,6 @@
     },
     mounted() {
       this.setupLeafletMap();
-      document.getElementById("app").addEventListener("touchend touchcancel", (e) => {
-        alert("touchend clicked");
-      });
     },
     methods: {
       setupLeafletMap: function() {
@@ -211,6 +208,11 @@
           }
 
           editableLayers.addLayer(layer);
+        });
+
+        this.mapDiv.on("mouseup", (e) => {
+          this.e = null;
+          this.stop_freehand();
         });
 
         this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
