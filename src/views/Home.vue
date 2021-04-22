@@ -37,6 +37,9 @@
     },
     mounted() {
       this.setupLeafletMap();
+      document.getElementById("app").addEventListener("click", (e) => {
+        alert("touchend");
+      });
     },
     methods: {
       setupLeafletMap: function() {
@@ -263,11 +266,19 @@
       },
 
       start_drawing() {
-        this.mapDiv.on("click touchstart", (e) => {
-          this.e = null;
-          this.e = e;
-          this.freehand_draw();
-        });
+        if (L.Browser.mobile) {
+          this.mapDiv.on("touchstart", (e) => {
+            this.e = null;
+            this.e = e;
+            this.freehand_draw();
+          });
+        } else {
+          this.mapDiv.on("mousedown", (e) => {
+            this.e = null;
+            this.e = e;
+            this.freehand_draw();
+          });
+        }
       },
       freehand_draw(e) {
         if (!this.drawing) {
