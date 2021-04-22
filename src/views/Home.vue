@@ -211,7 +211,7 @@
         });
 
         this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
-        this.mapDiv.on("touchend", alert("ended touch"));
+        this.mapDiv.on("touchend touchcancel", alert("ended touch 2"));
       },
       onLocationFound(e) {
         var radius = e.accuracy;
