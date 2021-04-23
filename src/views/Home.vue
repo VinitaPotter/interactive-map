@@ -18,6 +18,7 @@ export default {
   name: "Map",
   data() {
     return {
+      drawnItems: null,
       popup: null,
       selected_tool: "",
       prompt: false,
@@ -45,10 +46,10 @@ export default {
       // this.mapDiv.on("locationfound", this.onLocationFound);
       // this.mapDiv.on("locationerror", this.onLocationError);
 
-      var editableLayers = new L.FeatureGroup();
-      this.mapDiv.addLayer(editableLayers);
-      var drawnItems = new L.FeatureGroup();
-      this.mapDiv.addLayer(drawnItems);
+      // var editableLayers = new L.FeatureGroup();
+      // this.mapDiv.addLayer(editableLayers);
+      this.drawnItems = new L.FeatureGroup();
+      this.mapDiv.addLayer(this.drawnItems);
 
       L.Draw.Text = L.Draw.Marker.extend({
         initialize: function (map, options) {
@@ -63,7 +64,6 @@ export default {
           this.text_prompt();
         },
       });
-
       L.Draw.Freeline = L.Draw.Polyline.extend({
         options: {
           repeatMode: false,
@@ -110,15 +110,6 @@ export default {
         },
       });
 
-      var electricpole = L.Icon.extend({
-        options: {
-          shadowUrl: null,
-          iconAnchor: new L.Point(12, 12),
-          iconSize: new L.Point(30, 30),
-          iconUrl: "images/marker-icon.png",
-        },
-      });
-
       // Settings custom toolbars before initilising the toolbar
       L.DrawToolbar.include({
         getModeHandlers: function (map) {
@@ -150,17 +141,17 @@ export default {
             },
             {
               enabled: true,
-              handler: new L.Draw.Freeline(map, { icon: new electricpole() }),
+              handler: new L.Draw.Freeline(map),
               title: "Draw freehand shapes",
             },
             {
               enabled: true,
-              handler: new L.Draw.Text(map, { icon: new L.Icon.Default() }),
+              handler: new L.Draw.Text(map),
               title: "Add text",
             },
             {
               enabled: true,
-              handler: new L.Draw.Arrow(map, this.options.polygon),
+              handler: new L.Draw.Arrow(map),
               title: "Draw an arrow",
             },
           ];
@@ -202,7 +193,7 @@ export default {
           },
         },
         edit: {
-          featureGroup: drawnItems,
+          featureGroup: this.drawnItems,
         },
       });
 
@@ -232,7 +223,8 @@ export default {
           // layer.bindPopup("A popup!");
         }
 
-        editableLayers.addLayer(layer);
+        this.drawnItems.addLayer(layer);
+        console.log("srawnitme", this.drawnItems);
       });
 
       this.mapDiv.on("mouseup", (e) => {
@@ -283,7 +275,7 @@ export default {
 
     text_prompt() {
       this.mapDiv.on("click ", (e) => {
-        if (this.selected_tool == "Text") {
+        if (this.selected_tool == "text") {
           var myPopup = L.DomUtil.create("div");
           myPopup.innerHTML =
             "<div><input class='input' id='value' placeholder='Add text' type='text'/></div><button  id='input-btn' >Submit</button>";
@@ -329,7 +321,7 @@ export default {
       if (!this.drawing) {
         this.drawing = true;
 
-        this.line = L.polyline([]).addTo(this.mapDiv);
+        this.line = L.polyline([]).addTo(this.drawnItems);
         this.line.addLatLng(this.e.latlng);
         console.log("ADDED LINE");
       } else {
@@ -380,7 +372,7 @@ export default {
                 }),
               },
             ],
-          }).addTo(this.mapDiv);
+          }).addTo(this.drawnItems);
           this.mapDiv.touchZoom.enable();
           this.mapDiv.dragging.enable();
           this.mapDiv.doubleClickZoom.enable();
