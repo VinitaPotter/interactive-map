@@ -11,6 +11,7 @@
 
   import * as L from "leaflet";
   import "leaflet-draw";
+  import "leaflet-polylinedecorator";
   // import "leaflet-defaulticon-compatibility";
 
   export default {
@@ -89,6 +90,16 @@
             this.type = "arrow";
 
             L.Draw.Feature.prototype.initialize.call(this, map, options);
+          },
+          addHooks: () => {
+            this.draw_arrow();
+
+            if (this._map) {
+              this._tooltip.updateContent({ text: "Click map start drawing custom shape." });
+            }
+          },
+          removeHooks: () => {
+            this.draw_arrow();
           },
         });
 
@@ -328,6 +339,50 @@
         this.mapDiv.boxZoom.enable();
         this.mapDiv.keyboard.enable();
         console.log("Closed line", this.line);
+      },
+      draw_arrow() {
+        console.log("drawing arrow");
+        let pointA;
+        let pointB;
+        this.mapDiv.on("mousedown", (e) => {
+          if (this.selected_tool == "arrow") {
+            this.mapDiv.touchZoom.disable();
+            this.mapDiv.dragging.disable();
+            this.mapDiv.doubleClickZoom.disable();
+            this.mapDiv.scrollWheelZoom.disable();
+            this.mapDiv.boxZoom.disable();
+            this.mapDiv.keyboard.disable();
+            pointA = e.latlng;
+          }
+        });
+        this.mapDiv.on("mouseup", (e) => {
+          pointB = e.latlng;
+          if (this.selected_tool == "arrow") {
+            console.log(e);
+            var polyline = L.polyline([pointA, pointB]).addTo(this.mapDiv);
+            var decorator = L.polylineDecorator(polyline, {
+              patterns: [
+                {
+                  offset: "100%",
+                  repeat: 0,
+                  symbol: L.Symbol.arrowHead({
+                    pixelSize: 15,
+                    polygon: false,
+                    pathOptions: { stroke: true },
+                  }),
+                },
+              ],
+            }).addTo(this.mapDiv);
+            this.mapDiv.touchZoom.enable();
+            this.mapDiv.dragging.enable();
+            this.mapDiv.doubleClickZoom.enable();
+            this.mapDiv.scrollWheelZoom.enable();
+            this.mapDiv.boxZoom.enable();
+            this.mapDiv.keyboard.enable();
+            pointB = null;
+            pointA = null;
+          }
+        });
       },
     },
   };
