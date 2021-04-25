@@ -47,18 +47,16 @@ export default {
   },
   methods: {
     setupLeafletMap: function () {
-      // this.mapDiv = L.map("mapContainer").fitWorld();
-      this.mapDiv = L.map("mapContainer").setView(this.center, 13);
+      this.mapDiv = L.map("mapContainer").fitWorld();
+      // this.mapDiv = L.map("mapContainer").setView(this.center, 13);
       L.tileLayer(
         `https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${this.accessToken}`
       ).addTo(this.mapDiv);
-      // this.mapDiv.locate({ setView: true, maxZoom: 16 });
+      this.mapDiv.locate({ setView: true, maxZoom: 16 });
 
-      // this.mapDiv.on("locationfound", this.onLocationFound);
-      // this.mapDiv.on("locationerror", this.onLocationError);
+      this.mapDiv.on("locationfound", this.onLocationFound);
+      this.mapDiv.on("locationerror", this.onLocationError);
 
-      // var editableLayers = new L.FeatureGroup();
-      // this.mapDiv.addLayer(editableLayers);
       this.drawnItems = new L.FeatureGroup();
       this.mapDiv.addLayer(this.drawnItems);
 
@@ -302,17 +300,29 @@ export default {
         if (this.selected_tool == "custommarker") {
           // <img class='image' src='${require("../assets/star.png")}' alt=' /><img class='image' src='~@/assets/image.png' alt=' /><img class='image' src='~@/assets/camera.png' alt=' />
           var myPopup = L.DomUtil.create("div");
-          myPopup.innerHTML = `<div class='images'>
+          if (L.Browser.mobile) {
+            myPopup.innerHTML = `
+          <button id="icon">Icon</button>
+          <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
+          <button id="camera-btn">Camera</button>
+          `;
+          } else {
+            myPopup.innerHTML = `<div class='images'>
           <button id="icon">Icon</button>
           <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
           <button id="camera-btn">Camera</button>
           </div>`;
+          }
+
           this.popup = L.popup()
             .setLatLng(e.latlng)
             .setContent(myPopup)
             .openOn(this.mapDiv);
           //ICON MARKER
           let button = L.DomUtil.get("icon");
+          if (L.Browser.mobile) {
+            button.className = "is-hidden";
+          }
           let starIcon = L.icon({
             iconUrl: require("../assets/star.png"),
             // shadowUrl: require("../assets/star.png"),
@@ -364,6 +374,9 @@ export default {
           //CAMERA ICON
 
           let camera_btn = L.DomUtil.get("camera-btn");
+          if (L.Browser.mobile) {
+            camera_btn.className = "is-hidden";
+          }
           L.DomEvent.addListener(camera_btn, "click", () => {
             const supported = "mediaDevices" in navigator;
             if (!supported) {
@@ -577,6 +590,12 @@ export default {
     border-radius: 5px;
     margin-top: 5px;
   }
+}
+.leaflet-draw-draw-custommarker {
+  // background-position: 100% !important;
+  background: url("~@/assets/cam.png") no-repeat !important;
+  background-color: #fff !important;
+  background-position: center !important;
 }
 .leaflet-draw-draw-freeline {
   // background-position: 100% !important;
