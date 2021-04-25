@@ -7,12 +7,12 @@
 <script>
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
-// import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"; // Re-uses images from ~leaflet package
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"; // Re-uses images from ~leaflet package
 
 import * as L from "leaflet";
 import "leaflet-draw";
 import "leaflet-polylinedecorator";
-// import "leaflet-defaulticon-compatibility";
+import "leaflet-defaulticon-compatibility";
 
 export default {
   name: "Map",
@@ -109,6 +109,19 @@ export default {
           this.draw_arrow();
         },
       });
+      L.Draw.CustomMarker = L.Draw.Marker.extend({
+        initialize: function (map, options) {
+          this.type = "custommarker";
+          L.Draw.Feature.prototype.initialize.call(this, map, options);
+        },
+
+        addHooks: () => {
+          this.marker_promt();
+        },
+        removeHooks: () => {
+          this.marker_promt();
+        },
+      });
 
       // Settings custom toolbars before initilising the toolbar
       L.DrawToolbar.include({
@@ -136,7 +149,7 @@ export default {
             },
             {
               enabled: this.options.marker,
-              handler: new L.Draw.Marker(map, this.options.marker),
+              handler: new L.Draw.CustomMarker(map, this.options.marker),
               title: L.drawLocal.draw.toolbar.buttons.marker,
             },
             {
@@ -271,6 +284,72 @@ export default {
           setTimeout(() => (inThrottle = false), limit);
         }
       };
+    },
+
+    marker_promt() {
+      this.mapDiv.on("click ", (e) => {
+        if (this.selected_tool == "custommarker") {
+          // <img class='image' src='${require("../assets/star.png")}' alt=' /><img class='image' src='~@/assets/image.png' alt=' /><img class='image' src='~@/assets/camera.png' alt=' />
+          var myPopup = L.DomUtil.create("div");
+          myPopup.innerHTML = `<div class='images'>
+          <button id="icon">Icon</button>
+          <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
+          <button>Camera</button>
+          </div>`;
+          this.popup = L.popup()
+            .setLatLng(e.latlng)
+            .setContent(myPopup)
+            .openOn(this.mapDiv);
+
+          let button = L.DomUtil.get("icon");
+          let starIcon = L.icon({
+            iconUrl: require("../assets/star.png"),
+            // shadowUrl: require("../assets/star.png"),
+
+            iconSize: [60, 60], // size of the icon
+            // shadowSize: [50, 64], // size of the shadow
+            iconAnchor: [50, 50], // point of the icon which will correspond to marker's location
+            // shadowAnchor: [4, 62], // the same for the shadow
+            popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
+          });
+
+          L.DomEvent.addListener(button, "click", () => {
+            var marker = new L.marker(e.latlng, { icon: starIcon }); //opacity may be set to zero
+
+            marker.addTo(this.mapDiv);
+
+            this.mapDiv.closePopup();
+          });
+          let image_btn = L.DomUtil.get("img-btn");
+          L.DomEvent.addListener(image_btn, "click", () => {
+            let input = L.DomUtil.get("image");
+            input.click();
+
+            input.addEventListener("change", handleFiles, false);
+            let that = this;
+            function handleFiles() {
+              const fileList = this.files;
+
+              const reader = new FileReader();
+              reader.addEventListener("load", (event) => {
+                let img = event.target.result;
+                let imageIcon = L.icon({
+                  iconUrl: img,
+                  iconSize: [60, 60], // size of the icon
+                  iconAnchor: [50, 50], // point of the icon which will correspond to marker's location
+                  popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
+                });
+                var marker = new L.marker(e.latlng, { icon: imageIcon }); //opacity may be set to zero
+
+                marker.addTo(that.mapDiv);
+
+                that.mapDiv.closePopup();
+              });
+              reader.readAsDataURL(fileList[0]);
+            }
+          });
+        }
+      });
     },
 
     text_prompt() {
@@ -429,5 +508,30 @@ export default {
   background: url("~@/assets/font.png") no-repeat !important;
   background-color: #fff !important;
   background-position: center !important;
+}
+
+.image {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.images {
+  // display: flex;
+  background: white;
+  // width: 6rem;
+  // align-items: center;
+  // justify-content: center;
+  // box-shadow: 2px 2px 2px #ccc;
+  // border-radius: 4px;
+  // padding: 0.5rem;
+}
+
+button {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 0.3rem 0.7rem;
+  margin: 0.5rem;
+  border-radius: 2px;
+  cursor: pointer;
 }
 </style>
