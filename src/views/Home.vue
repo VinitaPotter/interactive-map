@@ -1,5 +1,16 @@
 <template>
   <div>
+    <div class="photo-capture" id="camera">
+      <div class="frame">
+        <video id="player" class="is-hidden" controls autoplay></video>
+        <canvas id="canvas" width="640" height="480" class=""></canvas>
+        <div>
+          <button id="capture" class="">Capture</button>
+          <button id="save" class="is-hidden">Save</button>
+          <button id="cancel" class="">Cancel</button>
+        </div>
+      </div>
+    </div>
     <div id="mapContainer"></div>
   </div>
 </template>
@@ -294,13 +305,13 @@ export default {
           myPopup.innerHTML = `<div class='images'>
           <button id="icon">Icon</button>
           <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
-          <button>Camera</button>
+          <button id="camera-btn">Camera</button>
           </div>`;
           this.popup = L.popup()
             .setLatLng(e.latlng)
             .setContent(myPopup)
             .openOn(this.mapDiv);
-
+          //ICON MARKER
           let button = L.DomUtil.get("icon");
           let starIcon = L.icon({
             iconUrl: require("../assets/star.png"),
@@ -320,6 +331,7 @@ export default {
 
             this.mapDiv.closePopup();
           });
+          //FILE IMAGE MARKER
           let image_btn = L.DomUtil.get("img-btn");
           L.DomEvent.addListener(image_btn, "click", () => {
             let input = L.DomUtil.get("image");
@@ -347,6 +359,81 @@ export default {
               });
               reader.readAsDataURL(fileList[0]);
             }
+          });
+
+          //CAMERA ICON
+
+          let camera_btn = L.DomUtil.get("camera-btn");
+          L.DomEvent.addListener(camera_btn, "click", () => {
+            const supported = "mediaDevices" in navigator;
+            if (!supported) {
+              alert("No camera found on this device");
+              return;
+            }
+            const camera = document.getElementById("camera");
+
+            const player = document.getElementById("player");
+            const canvas = document.getElementById("canvas");
+            const context = canvas.getContext("2d");
+            const captureButton = document.getElementById("capture");
+            const saveButton = document.getElementById("save");
+            const cancelButton = document.getElementById("cancel");
+            let photo;
+
+            camera.classList.toggle("camera-active");
+
+            player.classList.toggle("is-hidden");
+            canvas.classList.toggle("is-hidden");
+
+            const constraints = {
+              video: true,
+              audio: false,
+            };
+
+            // Get user media
+            navigator.mediaDevices
+              .getUserMedia(constraints)
+              .then((stream) => {
+                player.srcObject = stream;
+              })
+              .catch(function (err) {
+                console.log("An error occurred: " + err);
+              });
+
+            captureButton.addEventListener("click", () => {
+              // Draw the video frame to the canvas.
+              context.drawImage(player, 0, 0, canvas.width, canvas.height);
+              photo = canvas.toDataURL("image/png");
+              player.classList.toggle("is-hidden");
+              canvas.classList.toggle("is-hidden");
+              captureButton.classList.toggle("is-hidden");
+              saveButton.classList.toggle("is-hidden");
+            });
+            saveButton.addEventListener("click", () => {
+              let photIcon = L.icon({
+                iconUrl: photo,
+                iconSize: [60, 60], // size of the icon
+                iconAnchor: [50, 50], // point of the icon which will correspond to marker's location
+                popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
+              });
+              var marker = new L.marker(e.latlng, { icon: photIcon }); //opacity may be set to zero
+              camera.classList.toggle("camera-active");
+
+              marker.addTo(this.mapDiv);
+              this.mapDiv.closePopup();
+
+              // Stop all video streams.
+              player.srcObject
+                .getVideoTracks()
+                .forEach((track) => track.stop());
+            });
+            cancelButton.addEventListener("click", () => {
+              camera.classList.toggle("camera-active");
+              // Stop all video streams.
+              player.srcObject
+                .getVideoTracks()
+                .forEach((track) => track.stop());
+            });
           });
         }
       });
@@ -516,14 +603,7 @@ export default {
 }
 
 .images {
-  // display: flex;
   background: white;
-  // width: 6rem;
-  // align-items: center;
-  // justify-content: center;
-  // box-shadow: 2px 2px 2px #ccc;
-  // border-radius: 4px;
-  // padding: 0.5rem;
 }
 
 button {
@@ -534,4 +614,33 @@ button {
   border-radius: 2px;
   cursor: pointer;
 }
+.photo-capture {
+  position: absolute;
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  visibility: hidden;
+
+  &.camera-active {
+    visibility: visible;
+    top: 0;
+  }
+  .frame {
+    background: white;
+    padding: 1rem;
+    box-shadow: 10px 10px 10px #aaa;
+    border-radius: 11px;
+    padding-top: 0;
+  }
+}
+.is-vhidden {
+  visibility: hidden !important;
+}
+.is-hidden {
+  display: none;
+}
 </style>
+
