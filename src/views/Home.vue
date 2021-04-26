@@ -188,6 +188,17 @@
         L.Draw.Freeline = L.Draw.Polyline.extend({
           options: {
             repeatMode: false,
+            showArea: false,
+            shapeOptions: {
+              stroke: true,
+              color: "#f06eaa",
+              weight: 4,
+              opacity: 0.5,
+              fill: true,
+              fillColor: "#3e2", //same as color by default
+              fillOpacity: 0.2,
+              clickable: true,
+            },
           },
           initialize: function(map, options) {
             this.type = "freeline";
@@ -293,7 +304,7 @@
               },
               {
                 enabled: true,
-                handler: new L.Draw.Freeline(map),
+                handler: new L.Draw.Freeline(map, this.options.polygon),
                 title: "Draw freehand shapes",
               },
               {
@@ -341,11 +352,19 @@
                 color: "#ff0",
               },
             },
+            Freeline: {
+              shapeOptions: {
+                color: "#f357a1",
+                weight: 10,
+              },
+            },
           },
           edit: {
             featureGroup: this.drawnItems,
           },
         });
+
+        console.log({ drawControl });
 
         this.mapDiv.addControl(drawControl);
 
