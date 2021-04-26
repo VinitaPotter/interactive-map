@@ -352,19 +352,11 @@
                 color: "#ff0",
               },
             },
-            Freeline: {
-              shapeOptions: {
-                color: "#f357a1",
-                weight: 10,
-              },
-            },
           },
           edit: {
             featureGroup: this.drawnItems,
           },
         });
-
-        console.log({ drawControl });
 
         this.mapDiv.addControl(drawControl);
 
@@ -620,6 +612,11 @@
 
             this.line = L.polyline([]).addTo(this.drawnItems);
             this.line.addLatLng(this.e.latlng);
+            this.line.setStyle({
+              "color": "#fc032c",
+              "opacity": 0.4,
+              "weight": 8,
+            });
             console.log("ADDED LINE");
           } else {
             this.stop_freehand();
@@ -665,7 +662,7 @@
       draw_arrow() {
         console.log("drawing arrow");
         let pointA;
-        let pointB;
+
         this.mapDiv.on("mousedown", (e) => {
           if (this.selected_tool == "arrow") {
             this.mapDiv.touchZoom.disable();
@@ -676,6 +673,11 @@
             this.mapDiv.keyboard.disable();
             pointA = e.latlng;
             this.polyline = L.polyline([pointA, pointA]).addTo(this.mapDiv);
+            this.polyline.setStyle({
+              "color": "#f3f",
+              "opacity": 1,
+              "weight": 2,
+            });
           }
         });
         this.mapDiv.on("mousemove", (e) => {
@@ -695,7 +697,7 @@
                   symbol: L.Symbol.arrowHead({
                     pixelSize: 15,
                     polygon: false,
-                    pathOptions: { stroke: true },
+                    pathOptions: { stroke: true, color: "#f3f" },
                   }),
                 },
               ],
@@ -706,7 +708,7 @@
             this.mapDiv.scrollWheelZoom.enable();
             this.mapDiv.boxZoom.enable();
             this.mapDiv.keyboard.enable();
-            pointB = null;
+
             pointA = null;
             this.polyline = null;
           }
