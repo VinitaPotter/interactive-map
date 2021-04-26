@@ -58,6 +58,120 @@
         this.drawnItems = new L.FeatureGroup();
         this.mapDiv.addLayer(this.drawnItems);
 
+        // L.drawLocal = {
+        //   draw: {
+        //     toolbar: {
+        //       // #TODO: this should be reorganized where actions are nested in actions
+        //       // ex: actions.undo  or actions.cancel
+        //       actions: {
+        //         title: "Cancel - your text-",
+        //         text: "- your text-",
+        //       },
+        //       finish: {
+        //         title: "- your text-",
+        //         text: "- your text-",
+        //       },
+        //       undo: {
+        //         title: "- your text-",
+        //         text: "- your text-",
+        //       },
+        //       buttons: {
+        //         polyline: "- your text-",
+        //         polygon: "- your text-",
+        //         rectangle: "- your text-",
+        //         circle: "- your text-",
+        //         marker: "- your text-",
+        //         circlemarker: "- your text-",
+        //       },
+        //     },
+        //     handlers: {
+        //       circle: {
+        //         tooltip: {
+        //           start: "- your text-",
+        //         },
+        //         radius: "- your text-",
+        //       },
+        //       circlemarker: {
+        //         tooltip: {
+        //           start: "- your text-.",
+        //         },
+        //       },
+        //       marker: {
+        //         tooltip: {
+        //           start: "- your text-.",
+        //         },
+        //       },
+        //       polygon: {
+        //         tooltip: {
+        //           start: "- your text-.",
+        //           cont: "- your text-.",
+        //           end: "- your text-.",
+        //         },
+        //       },
+        //       polyline: {
+        //         error: "<strong>Error:</strong> shape edges cannot cross!",
+        //         tooltip: {
+        //           start: "Click to start drawing line.",
+        //           cont: "Click to continue drawing line.",
+        //           end: "Click last point to finish line.",
+        //         },
+        //       },
+        //       rectangle: {
+        //         tooltip: {
+        //           start: "- your text-.",
+        //         },
+        //       },
+        //       simpleshape: {
+        //         tooltip: {
+        //           end: "Release mouse to finish drawing.",
+        //         },
+        //       },
+        //       arrow: {
+        //         tooltip: {
+        //           cont: "Release mouse to finish drawing.",
+        //         },
+        //       },
+        //     },
+        //   },
+        //   edit: {
+        //     toolbar: {
+        //       actions: {
+        //         save: {
+        //           title: "Save changes",
+        //           text: "Save",
+        //         },
+        //         cancel: {
+        //           title: "Cancel editing, discards all changes",
+        //           text: "Cancel",
+        //         },
+        //         clearAll: {
+        //           title: "Clear all layers",
+        //           text: "Clear All",
+        //         },
+        //       },
+        //       buttons: {
+        //         edit: "Edit layers",
+        //         editDisabled: "No layers to edit",
+        //         remove: "Delete layers",
+        //         removeDisabled: "No layers to delete",
+        //       },
+        //     },
+        //     handlers: {
+        //       edit: {
+        //         tooltip: {
+        //           text: "Drag handles or markers to edit features.",
+        //           subtext: "Click cancel to undo changes.",
+        //         },
+        //       },
+        //       remove: {
+        //         tooltip: {
+        //           text: "Click on a feature to remove.",
+        //         },
+        //       },
+        //     },
+        //   },
+        // };
+
         L.Draw.Text = L.Draw.Marker.extend({
           initialize: function(map, options) {
             this.type = "text";
@@ -93,8 +207,23 @@
           removeHooks: () => {
             this.start_drawing();
           },
+          deleteLastVertex: () => {
+            let markers = this.line._latlngs;
+            if (!markers.length) {
+              return;
+            } else {
+              markers.pop();
+              this.line.setLatLngs(markers);
+            }
+          },
+          completeShape: function() {
+            this.disable();
+            if (this.options.repeatMode) {
+              this.enable();
+            }
+          },
         });
-        L.Draw.Arrow = L.Draw.Polyline.extend({
+        L.Draw.Arrow = L.Draw.Marker.extend({
           options: {
             repeatMode: false,
           },
@@ -127,6 +256,9 @@
           },
           removeHooks: () => {
             this.marker_promt();
+          },
+          setOptions: function(options) {
+            L.setOptions(this, options);
           },
         });
 
@@ -186,13 +318,6 @@
                 weight: 10,
               },
             },
-            arrow: {
-              shapeOptions: {
-                color: "#f357a1",
-                weight: 10,
-              },
-            },
-
             polygon: {
               allowIntersection: false, // Restricts shapes to simple polygons
               drawError: {
@@ -205,6 +330,12 @@
             },
 
             rectangle: {
+              shapeOptions: {
+                clickable: true,
+                color: "#ff0",
+              },
+            },
+            circle: {
               shapeOptions: {
                 clickable: true,
                 color: "#ff0",
@@ -267,30 +398,6 @@
         alert(e.message);
         this.mapDiv.setView(this.center, 13);
       },
-      drawLine(e) {
-        if (this.drawing) {
-          console.log("drawing..");
-          this.mapDiv.touchZoom.disable();
-          this.mapDiv.dragging.disable();
-          this.mapDiv.doubleClickZoom.disable();
-          this.mapDiv.scrollWheelZoom.disable();
-          this.mapDiv.boxZoom.disable();
-          this.mapDiv.keyboard.disable();
-          this.line.addLatLng(e.latlng);
-        }
-      },
-      throttle(func, limit) {
-        let inThrottle;
-        return function() {
-          const args = arguments;
-          const context = this;
-          if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => (inThrottle = false), limit);
-          }
-        };
-      },
 
       marker_promt() {
         this.mapDiv.on("click ", (e) => {
@@ -304,10 +411,10 @@
             //  `;
             // } else {
             myPopup.innerHTML = `<div class='images'>
-          <button id="icon">Icon</button>
-          <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
-          <button id="camera-btn">Camera</button>
-          </div>`;
+            <button id="icon">Icon</button>
+            <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
+            <button id="camera-btn">Camera</button>
+            </div>`;
             // }
 
             this.popup = L.popup()
@@ -488,14 +595,16 @@
         }
       },
       freehand_draw(e) {
-        if (!this.drawing) {
-          this.drawing = true;
+        if (this.selected_tool == "freeline") {
+          if (!this.drawing) {
+            this.drawing = true;
 
-          this.line = L.polyline([]).addTo(this.drawnItems);
-          this.line.addLatLng(this.e.latlng);
-          console.log("ADDED LINE");
-        } else {
-          this.stop_freehand();
+            this.line = L.polyline([]).addTo(this.drawnItems);
+            this.line.addLatLng(this.e.latlng);
+            console.log("ADDED LINE");
+          } else {
+            this.stop_freehand();
+          }
         }
       },
       stop_freehand() {
@@ -509,6 +618,30 @@
           this.mapDiv.keyboard.enable();
           console.log("Closed line", this.line);
         }
+      },
+      drawLine(e) {
+        if (this.drawing) {
+          console.log("drawing..");
+          this.mapDiv.touchZoom.disable();
+          this.mapDiv.dragging.disable();
+          this.mapDiv.doubleClickZoom.disable();
+          this.mapDiv.scrollWheelZoom.disable();
+          this.mapDiv.boxZoom.disable();
+          this.mapDiv.keyboard.disable();
+          this.line.addLatLng(e.latlng);
+        }
+      },
+      throttle(func, limit) {
+        let inThrottle;
+        return function() {
+          const args = arguments;
+          const context = this;
+          if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => (inThrottle = false), limit);
+          }
+        };
       },
       draw_arrow() {
         console.log("drawing arrow");
@@ -532,7 +665,7 @@
           }
         });
         this.mapDiv.on("mouseup", (e) => {
-          pointB = e.latlng;
+          console.log(this.polyline);
           if (this.selected_tool == "arrow") {
             console.log(e);
             var decorator = L.polylineDecorator(this.polyline, {
