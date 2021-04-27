@@ -63,28 +63,38 @@
         this.color = payload.color;
         switch (payload.type) {
           case "arrow":
-            document.querySelector(".leaflet-draw-draw-arrow").click();
+            new L.Draw.Arrow(this.mapDiv).enable();
+
+            // document.querySelector(".leaflet-draw-draw-arrow").click();
             break;
           case "line":
-            document.querySelector(".leaflet-draw-draw-polyline").click();
+            new L.Draw.Polyline(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
+
+            // document.querySelector(".leaflet-draw-draw-polyline").click();
             break;
-          // case "polygon":
-          //   document.querySelector(".leaflet-draw-draw-polygon").click();
-          //   break;
           case "text":
-            document.querySelector(".leaflet-draw-draw-text").click();
+            new L.Draw.Text(this.mapDiv).enable();
+
+            // document.querySelector(".leaflet-draw-draw-text").click();
             break;
           case "circle":
-            document.querySelector(".leaflet-draw-draw-circle").click();
+            new L.Draw.Circle(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
+
+            // document.querySelector(".leaflet-draw-draw-circle").click();
             break;
           case "rectangle":
-            document.querySelector(".leaflet-draw-draw-rectangle").click();
+            new L.Draw.Rectangle(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
+
+            // document.querySelector(".leaflet-draw-draw-rectangle").click();
             break;
           case "polygon":
-            document.querySelector(".leaflet-draw-draw-polygon").click();
+            new L.Draw.Polygon(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
+
+            // document.querySelector(".leaflet-draw-draw-polygon").click();
             break;
           default:
-            document.querySelector(".leaflet-draw-draw-freeline").click();
+            new L.Draw.Freeline(this.mapDiv).enable();
+          // document.querySelector(".leaflet-draw-draw-freeline").click();
         }
       },
       setupLeafletMap: function() {
@@ -708,6 +718,7 @@
             });
           }
         });
+        // this.mapDiv.removeEventListener("click");
       },
 
       text_prompt() {

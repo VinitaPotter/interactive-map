@@ -93,9 +93,9 @@
         if (this.selected_tool == "text") {
           this.$emit("draw", { type: "text", color: this.color });
         }
-        if (this.selected_tool == "polygon") {
-          this.$emit("draw", { type: "polygon", color: this.color });
-        }
+        // if (this.selected_tool == "polygon") {
+        //   this.$emit("draw", { type: "polygon", color: this.color });
+        // }
       },
       select_polygon_type(type) {
         this.selected_type = type;
