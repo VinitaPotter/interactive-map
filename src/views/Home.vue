@@ -1,5 +1,6 @@
 <template>
   <div>
+    <toolbar @draw="trigger_toolbar($event)" @update-color="color = $event"></toolbar>
     <div class="photo-capture" id="camera">
       <div class="frame">
         <video id="player" class="is-hidden" controls autoplay></video>
@@ -25,10 +26,13 @@
   import "leaflet-polylinedecorator";
   import "leaflet-defaulticon-compatibility";
 
+  import Toolbar from "../components/toolbar.vue";
+
   export default {
     name: "Map",
     data() {
       return {
+        drawControl: null,
         polyline: null,
         drawnItems: null,
         popup: null,
@@ -39,18 +43,38 @@
         mapDiv: null,
         line: "",
         drawing: false,
-        accessToken: "pk.eyJ1IjoidGVzdGVyMjM4Nzg2MjciLCJhIjoiY2tub2k2OWFrMHlxcDJ2bzVnbm5na213cyJ9.gpHnP345S2_zJHsj_Zx46A",
+        accessToken: "pk.eyJ1IjoidGVzdGVyMjM4Nzg2MjciLCJhIjoiY2tuenBoNXRjMDd3NDJwb2JoZTgwdXkyNCJ9.zhWEouASkv8bAjhZ7xGxAw",
+        width: 8,
+        color: "#fea254",
       };
     },
+    components: {
+      Toolbar,
+    },
+
     mounted() {
       this.setupLeafletMap();
     },
     methods: {
+      trigger_toolbar(payload) {
+        this.width = payload.width;
+        this.color = payload.color;
+        switch (payload.type) {
+          case "arrow":
+            document.querySelector(".leaflet-draw-draw-arrow").click();
+            break;
+          case "line":
+            document.querySelector(".leaflet-draw-draw-polyline").click();
+            break;
+          default:
+            document.querySelector(".leaflet-draw-draw-freeline").click();
+        }
+      },
       setupLeafletMap: function() {
         // this.mapDiv = L.map("mapContainer").fitWorld();
         this.mapDiv = L.map("mapContainer").setView(this.center, 13);
         L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${this.accessToken}`).addTo(this.mapDiv);
-        this.mapDiv.locate({ setView: true, maxZoom: 16 });
+        // this.mapDiv.locate({ setView: true, maxZoom: 16 });
 
         // this.mapDiv.on("locationfound", this.onLocationFound);
         // this.mapDiv.on("locationerror", this.onLocationError);
@@ -189,16 +213,6 @@
           options: {
             repeatMode: false,
             showArea: false,
-            shapeOptions: {
-              stroke: true,
-              color: "#f06eaa",
-              weight: 4,
-              opacity: 0.5,
-              fill: true,
-              fillColor: "#3e2", //same as color by default
-              fillOpacity: 0.2,
-              clickable: true,
-            },
           },
           initialize: function(map, options) {
             this.type = "freeline";
@@ -321,35 +335,35 @@
           },
         });
 
-        var drawControl = new L.Control.Draw({
+        this.drawControl = new L.Control.Draw({
           draw: {
             polyline: {
               shapeOptions: {
-                color: "#f357a1",
+                color: this.color,
                 weight: 10,
               },
             },
             polygon: {
               allowIntersection: false, // Restricts shapes to simple polygons
               drawError: {
-                color: "#3df", // Color the shape will turn when intersects
+                color: this.color, // Color the shape will turn when intersects
                 message: "<strong>Polygon draw does not allow intersections!<strong> (allowIntersection: false)", // Message that will show when intersect
               },
               shapeOptions: {
-                color: "#bad",
+                color: this.color,
               },
             },
 
             rectangle: {
               shapeOptions: {
                 clickable: true,
-                color: "#ff0",
+                color: this.color,
               },
             },
             circle: {
               shapeOptions: {
                 clickable: true,
-                color: "#ff0",
+                color: this.color,
               },
             },
           },
@@ -358,7 +372,7 @@
           },
         });
 
-        this.mapDiv.addControl(drawControl);
+        this.mapDiv.addControl(this.drawControl);
 
         this.mapDiv.on(L.Draw.Event.DRAWSTART, (e) => {
           console.log(e);
@@ -612,10 +626,11 @@
 
             this.line = L.polyline([]).addTo(this.drawnItems);
             this.line.addLatLng(this.e.latlng);
+            console.log(this.width);
             this.line.setStyle({
-              "color": "#fc032c",
-              "opacity": 0.4,
-              "weight": 8,
+              "color": this.color,
+              "opacity": 0.9,
+              "weight": this.width,
             });
             console.log("ADDED LINE");
           } else {
@@ -674,7 +689,7 @@
             pointA = e.latlng;
             this.polyline = L.polyline([pointA, pointA]).addTo(this.mapDiv);
             this.polyline.setStyle({
-              "color": "#f3f",
+              "color": this.color,
               "opacity": 1,
               "weight": 2,
             });
@@ -697,7 +712,7 @@
                   symbol: L.Symbol.arrowHead({
                     pixelSize: 15,
                     polygon: false,
-                    pathOptions: { stroke: true, color: "#f3f" },
+                    pathOptions: { stroke: true, color: this.color },
                   }),
                 },
               ],
@@ -810,6 +825,9 @@
     visibility: hidden !important;
   }
   .is-hidden {
+    display: none;
+  }
+  .leaflet-draw-section {
     display: none;
   }
 </style>
