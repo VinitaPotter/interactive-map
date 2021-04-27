@@ -57,7 +57,14 @@
         this.$emit("update-color", col);
       },
       update_selection(tool) {
+        this.selected_type = null;
         this.selected_tool == tool ? (this.selected_tool = null) : (this.selected_tool = tool);
+        if (this.selected_tool == "text") {
+          this.$emit("draw", { type: "text", color: this.color });
+        }
+        if (this.selected_tool == "polygon") {
+          this.$emit("draw", { type: "polygon", color: this.color });
+        }
       },
       select_tool_props(type) {
         // if (this.selected_tool) {

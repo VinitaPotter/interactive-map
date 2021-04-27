@@ -66,6 +66,12 @@
           case "line":
             document.querySelector(".leaflet-draw-draw-polyline").click();
             break;
+          case "polygon":
+            document.querySelector(".leaflet-draw-draw-polygon").click();
+            break;
+          case "text":
+            document.querySelector(".leaflet-draw-draw-text").click();
+            break;
           default:
             document.querySelector(".leaflet-draw-draw-freeline").click();
         }
