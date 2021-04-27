@@ -3,6 +3,17 @@
     <ul class="c-toolbar">
       <li :class="{ 'active': selected_tool == 'polygon' }" @click="update_selection('polygon')">
         <i class="fas fa-shapes"></i>
+        <ul class="c-toolbar__nested" v-if="selected_tool == 'polygon'">
+          <li @click="select_polygon_type('rectangle')">
+            <i class="far fa-square"></i>
+          </li>
+          <li @click="select_polygon_type('polygon')">
+            <i class="fas fa-draw-polygon"></i>
+          </li>
+          <li @click="select_polygon_type('circle')">
+            <i class="far fa-circle"></i>
+          </li>
+        </ul>
       </li>
       <li :class="{ 'active': selected_tool == 'text' }" @click="update_selection('text')">
         <i class="fab fa-amilia"></i>
@@ -24,6 +35,20 @@
           </li>
           <li @click="select_tool_props('arrow')">
             <i class="fas fa-long-arrow-alt-up"></i>
+          </li>
+        </ul>
+      </li>
+      <li :class="{ 'active': selected_tool == 'marker' }" @click="update_selection('marker')">
+        <i class="fas fa-map-pin"></i>
+        <ul class="c-toolbar__nested" v-if="selected_tool == 'marker'">
+          <li @click="select_marker_type('marker')">
+            <i class="fas fa-map-marker-alt"></i>
+          </li>
+          <li @click="select_marker_type('image')">
+            <i class="fas fa-image"></i>
+          </li>
+          <li @click="select_marker_type('camera')">
+            <i class="fas fa-camera"></i>
           </li>
         </ul>
       </li>
@@ -66,9 +91,13 @@
           this.$emit("draw", { type: "polygon", color: this.color });
         }
       },
+      select_polygon_type(type) {
+        this.$emit("draw", { type: type, color: this.color });
+      },
+      select_marker_type(type) {
+        this.$emit("add-marker", type);
+      },
       select_tool_props(type) {
-        // if (this.selected_tool) {
-        this.selected_type = type;
         if (type == "line") {
           this.$emit("draw", { type: "line", color: this.color });
         } else if (type == "arrow") {
@@ -76,9 +105,6 @@
         } else {
           this.$emit("draw", { type: "freehand", width: type, color: this.color });
         }
-        // } else {
-        //   this.$emit("stop-drawing");
-        // }
       },
       open_color_picker() {
         document.getElementById("favcolor").click();
@@ -129,7 +155,7 @@
     }
     &.is-color-picker {
       color: pink;
-      top: 290px;
+      top: 340px;
       width: 25px;
       padding: 0 !important;
       p {
