@@ -729,7 +729,7 @@
                 marker.bindTooltip(content, {
                   permanent: true,
                   className: "my-label",
-                  offset: [0, 0],
+                  offset: [-50, 0],
                 });
                 marker.addTo(this.mapDiv);
               }
@@ -962,7 +962,37 @@
   .is-hidden {
     display: none;
   }
-  .leaflet-draw-section {
+  .leaflet-draw-toolbar-top {
     display: none;
+  }
+
+  .leaflet-draw-edit-remove {
+    background: #3c3e42 !important;
+    &::before {
+      content: "\f2ed";
+      color: white;
+      font-weight: 900;
+      font-family: FontAwesome;
+    }
+  }
+  .leaflet-draw-edit-edit {
+    background: #3c3e42 !important;
+    &::before {
+      content: "\f044";
+      color: white;
+      font-weight: 900;
+      font-family: FontAwesome;
+    }
+  }
+  .leaflet-draw-actions {
+    display: none !important;
+  }
+
+  .my-label {
+    background: none;
+    box-shadow: none;
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: maroon;
   }
 </style>

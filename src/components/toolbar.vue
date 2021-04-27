@@ -1,7 +1,10 @@
 <template>
   <div>
     <ul class="c-toolbar">
-      <li :class="{ 'active': selected_tool == 'polygon' }" @click="update_selection('polygon')">
+      <li
+        :class="{ 'active': selected_type == 'polygon' || selected_type == 'rectangle' || selected_type == 'circle' }"
+        @click="update_selection('polygon')"
+      >
         <i class="fas fa-shapes"></i>
         <ul class="c-toolbar__nested" v-if="selected_tool == 'polygon'">
           <li @click="select_polygon_type('rectangle')">
@@ -18,7 +21,7 @@
       <li :class="{ 'active': selected_tool == 'text' }" @click="update_selection('text')">
         <i class="fab fa-amilia"></i>
       </li>
-      <li :class="{ 'active': selected_type && selected_type.length }" @click="update_selection('pen')">
+      <li :class="{ 'active': selected_type == 'line' || selected_type == 'arrow' || selected_type == 'freehand' }" @click="update_selection('pen')">
         <i class="fas fa-pen"></i>
         <ul class="c-toolbar__nested" v-if="selected_tool == 'pen'">
           <li @click="select_tool_props('5')">
@@ -38,7 +41,10 @@
           </li>
         </ul>
       </li>
-      <li :class="{ 'active': selected_tool == 'marker' }" @click="update_selection('marker')">
+      <li
+        :class="{ 'active': selected_type == 'marker' || selected_type == 'image' || selected_type == 'camera' }"
+        @click="update_selection('marker')"
+      >
         <i class="fas fa-map-pin"></i>
         <ul class="c-toolbar__nested" v-if="selected_tool == 'marker'">
           <li @click="select_marker_type('marker')">
@@ -82,7 +88,7 @@
         this.$emit("update-color", col);
       },
       update_selection(tool) {
-        this.selected_type = null;
+        // this.selected_type = null;
         this.selected_tool == tool ? (this.selected_tool = null) : (this.selected_tool = tool);
         if (this.selected_tool == "text") {
           this.$emit("draw", { type: "text", color: this.color });
@@ -92,17 +98,23 @@
         }
       },
       select_polygon_type(type) {
+        this.selected_type = type;
         this.$emit("draw", { type: type, color: this.color });
       },
       select_marker_type(type) {
+        this.selected_type = type;
         this.$emit("add-marker", type);
       },
       select_tool_props(type) {
         if (type == "line") {
+          this.selected_type = "line";
           this.$emit("draw", { type: "line", color: this.color });
         } else if (type == "arrow") {
+          this.selected_type = "arrow";
           this.$emit("draw", { type: "arrow", color: this.color });
         } else {
+          this.selected_type = "freehand";
+
           this.$emit("draw", { type: "freehand", width: type, color: this.color });
         }
       },
@@ -122,8 +134,9 @@
     background: #3c3e42;
     color: white;
     border-radius: 3px;
-    left: 22px;
-    top: 160px;
+    left: 20px;
+    top: 250px;
+    width: 31px;
     li {
       padding: 5px;
       cursor: pointer;
@@ -155,9 +168,9 @@
     }
     &.is-color-picker {
       color: pink;
-      top: 340px;
-      width: 25px;
-      padding: 0 !important;
+      top: 400px;
+      width: 30px;
+      padding: 3px 0px !important;
       p {
         margin: auto;
         padding: 5px;
