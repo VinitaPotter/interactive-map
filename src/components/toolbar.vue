@@ -62,7 +62,7 @@
     <div class="c-toolbar is-color-picker">
       <p>
         <i class="fas fa-dot-circle" @click="open_color_picker" :style="{ 'color': color }"></i>
-        <input type="color" id="favcolor" name="favcolor" v-model="color" @change="update_color" />
+        <input type="color" id="favcolor" name="favcolor" v-model="color" />
       </p>
     </div>
   </div>
@@ -77,6 +77,11 @@
         color: "#F6C",
         width: -1,
       };
+    },
+    watch: {
+      color(val) {
+        this.update_color(val);
+      },
     },
 
     methods: {
@@ -186,6 +191,12 @@
   #favcolor {
     visibility: hidden;
     // display: none;
+  }
+  @media only screen and (max-width: 600px) {
+    #favcolor {
+      // visibility: hidden;
+      display: none;
+    }
   }
   .active {
     background: teal;
