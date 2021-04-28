@@ -1,6 +1,5 @@
 <template>
   <div>
-    {{ active_toolbar }}
     <ul class="c-toolbar">
       <li
         :class="{ 'active': selected_type == 'polygon' || selected_type == 'rectangle' || selected_type == 'circle' }"
@@ -76,7 +75,6 @@
         selected_tool: null,
         selected_type: null,
         color: "#F6C",
-        active_toolbar: null,
       };
     },
     watch: {
@@ -91,6 +89,10 @@
       },
       update_selection(tool) {
         this.selected_tool == tool ? (this.selected_tool = null) : (this.selected_tool = tool);
+        if (this.selected_tool == "text") {
+          this.selected_tool = null;
+          this.$emit("draw", { type: "text", color: this.color });
+        }
       },
       select_polygon_type(type) {
         this.selected_type = type;
@@ -99,7 +101,6 @@
       select_marker_type(type) {
         this.selected_type = type;
         this.$emit("add-marker", type);
-        this.active_toolbar = null;
       },
       select_tool_props(type) {
         if (type == "line") {
@@ -112,7 +113,6 @@
           this.selected_type = "freehand";
           this.tool_selected({ type: "freehand", width: type, color: this.color });
         }
-        this.active_toolbar = null;
       },
       tool_selected(payload) {
         this.$emit("draw", payload);

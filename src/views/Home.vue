@@ -254,7 +254,36 @@
         });
 
         this.drawControl = new L.Control.Draw({
-          draw: {},
+          draw: {
+            polyline: {
+              shapeOptions: {
+                color: "#f357a1",
+                weight: 10,
+              },
+            },
+            polygon: {
+              allowIntersection: false, // Restricts shapes to simple polygons
+              drawError: {
+                color: "#3df", // Color the shape will turn when intersects
+                message: "<strong>Polygon draw does not allow intersections!<strong> (allowIntersection: false)", // Message that will show when intersect
+              },
+              shapeOptions: {
+                color: "#bad",
+              },
+            },
+            rectangle: {
+              shapeOptions: {
+                clickable: true,
+                color: "#ff0",
+              },
+            },
+            circle: {
+              shapeOptions: {
+                clickable: true,
+                color: "#ff0",
+              },
+            },
+          },
           edit: {
             featureGroup: this.drawnItems,
           },
@@ -298,6 +327,10 @@
             el.firstElementChild.style.width = updatedSize + "px";
           });
           // $("#mapContainer .my-div-icon").css({ "width": 200, "height": 200 });
+        });
+        this.mapDiv.on("keypress", (e) => {
+          // new L.EditToolbar.Edit(this.drawnItems).disable();
+          // console.log("edit", L.EditToolbar.Edit.save());
         });
       },
       onLocationFound(e) {
@@ -458,137 +491,11 @@
         });
       },
 
-      // add_marker(marker_type) {
-      //   this.mapDiv.on("click ", (e) => {
-      //     // console.log({ e });
-      //     let clicked_at = e;
-      //     //ICON MARKER
-
-      //     // https://stackoverflow.com/questions/46015066/leaflet-custom-icon-resize-on-zoom-performance-icon-vs-divicon
-      //     if (marker_type == "marker") {
-      //       // let starIcon = L.icon({
-      //       //   iconUrl: require("../assets/star.png"),
-      //       //   iconSize: this.iconSize, // size of the icon
-      //       //   iconAnchor: [50, 50], // point of the icon which will correspond to marker's location
-      //       //   popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
-      //       // });
-      //       let iconString = `<img class="img" src=${require("../assets/star.png")} alt/>`;
-      //       let starIcon = L.divIcon({ className: "my-div-icon", html: iconString });
-
-      //       var marker = new L.marker(e.latlng, { icon: starIcon }); //opacity may be set to zero
-
-      //       marker.addTo(this.drawnItems);
-      //     }
-
-      //     //FILE IMAGE MARKER
-      //     if (marker_type == "image") {
-      //       let input = document.getElementById("image");
-      //       input.click();
-
-      //       let that = this;
-      //       input.addEventListener(
-      //         "change",
-      //         function(e) {
-      //           const fileList = this.files;
-      //           const reader = new FileReader();
-      //           reader.addEventListener("load", (event) => {
-      //             let img = event.target.result;
-      //             let imageIcon = L.icon({
-      //               iconUrl: img,
-      //               iconSize: [60, 60], // size of the icon
-      //               iconAnchor: [50, 50], // point of the icon which will correspond to marker's location
-      //               popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
-      //             });
-      //             var marker = new L.marker(clicked_at.latlng, { icon: imageIcon }); //opacity may be set to zero
-      //             marker.addTo(that.drawnItems);
-      //           });
-      //           reader.readAsDataURL(fileList[0]);
-      //         },
-      //         false
-      //       );
-      //     }
-
-      //     //CAMERA ICON
-      //     if (marker_type == "camera") {
-      //       const supported = "mediaDevices" in navigator;
-      //       if (!supported) {
-      //         alert("No camera found on this device");
-      //         return;
-      //       }
-      //       const camera = document.getElementById("camera");
-      //       const player = document.getElementById("player");
-      //       const canvas = document.getElementById("canvas");
-      //       const context = canvas.getContext("2d");
-      //       const captureButton = document.getElementById("capture");
-      //       const saveButton = document.getElementById("save");
-      //       const cancelButton = document.getElementById("cancel");
-      //       let photo;
-
-      //       camera.classList.toggle("camera-active");
-
-      //       player.classList.toggle("is-hidden");
-      //       canvas.classList.toggle("is-hidden");
-
-      //       const constraints = {
-      //         video: true,
-      //         audio: false,
-      //       };
-
-      //       // Get user media
-      //       navigator.mediaDevices
-      //         .getUserMedia(constraints)
-      //         .then((stream) => {
-      //           player.srcObject = stream;
-      //         })
-      //         .catch(function(err) {
-      //           console.log("An error occurred: " + err);
-      //         });
-
-      //       captureButton.addEventListener("click", () => {
-      //         // Draw the video frame to the canvas.
-      //         context.drawImage(player, 0, 0, canvas.width, canvas.height);
-      //         photo = canvas.toDataURL("image/png");
-      //         player.classList.toggle("is-hidden");
-      //         canvas.classList.toggle("is-hidden");
-      //         captureButton.classList.toggle("is-hidden");
-      //         saveButton.classList.toggle("is-hidden");
-      //       });
-      //       saveButton.addEventListener("click", () => {
-      //         let photIcon = L.icon({
-      //           iconUrl: photo,
-      //           iconSize: [60, 60], // size of the icon
-      //           iconAnchor: [50, 50], // point of the icon which will correspond to marker's location
-      //           popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
-      //         });
-      //         var marker = new L.marker(e.latlng, { icon: photIcon }); //opacity may be set to zero
-      //         camera.classList.toggle("camera-active");
-
-      //         marker.addTo(this.drawnItems);
-      //         this.mapDiv.closePopup();
-
-      //         // Stop all video streams.
-      //         player.srcObject.getVideoTracks().forEach((track) => track.stop());
-      //       });
-      //       cancelButton.addEventListener("click", () => {
-      //         camera.classList.toggle("camera-active");
-      //         // Stop all video streams.
-      //         player.srcObject.getVideoTracks().forEach((track) => track.stop());
-      //       });
-      //     }
-      //     clicked_at = null;
-      //   });
-      // },
       add_marker(marker_type) {
         let action = (e) => {
           //ICON MARKER
           // https://stackoverflow.com/questions/46015066/leaflet-custom-icon-resize-on-zoom-performance-icon-vs-divicon
           if (marker_type == "marker") {
-            // let starIcon = L.icon({
-            //   iconUrl: require("../assets/star.png"),
-            //   iconSize: this.iconSize, // size of the icon
-            //   iconAnchor: [50, 50], // point of the icon which will correspond to marker's location
-            //   popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
-            // });
             let iconString = `<img class="img" src=${require("../assets/star.png")} alt/>`;
             let starIcon = L.divIcon({
               className: "my-div-icon",
@@ -961,7 +868,7 @@
     }
   }
   .leaflet-draw-actions {
-    display: none !important;
+    // display: none !important;
   }
 
   .my-label {
