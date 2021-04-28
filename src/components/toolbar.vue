@@ -62,8 +62,8 @@
     <div class="c-toolbar is-color-picker">
       <p>
         <i class="fas fa-dot-circle" @click="open_color_picker" :style="{ 'color': color }"></i>
-        <input type="color" id="favcolor" name="favcolor" v-model="color" />
       </p>
+      <input type="color" id="favcolor" name="favcolor" v-model="color" />
     </div>
   </div>
 </template>
@@ -207,5 +207,21 @@
   }
   .active {
     background: teal;
+  }
+
+  input[type="color"] {
+    background: #3c3e42;
+  }
+
+  input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+    padding: 0;
+  }
+
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    border: none;
+    border-radius: 50%;
+    padding: 4px;
   }
 </style>
