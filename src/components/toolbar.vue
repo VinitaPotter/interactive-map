@@ -7,13 +7,13 @@
       >
         <i class="fas fa-shapes"></i>
         <ul class="c-toolbar__nested" v-if="selected_tool == 'polygon'">
-          <li @click="select_polygon_type('rectangle')">
+          <li @click="select_polygon_type('rectangle')" :class="{ 'active': selected_type == 'rectangle' }">
             <i class="far fa-square"></i>
           </li>
-          <li @click="select_polygon_type('polygon')">
+          <li @click="select_polygon_type('polygon')" :class="{ 'active': selected_type == 'polygon' }">
             <i class="fas fa-draw-polygon"></i>
           </li>
-          <li @click="select_polygon_type('circle')">
+          <li @click="select_polygon_type('circle')" :class="{ 'active': selected_type == 'circle' }">
             <i class="far fa-circle"></i>
           </li>
         </ul>
@@ -24,19 +24,19 @@
       <li :class="{ 'active': selected_type == 'line' || selected_type == 'arrow' || selected_type == 'freehand' }" @click="update_selection('pen')">
         <i class="fas fa-pen"></i>
         <ul class="c-toolbar__nested" v-if="selected_tool == 'pen'">
-          <li @click="select_tool_props('5')">
+          <li @click="select_tool_props('5')" :class="{ 'active': width == '5' && selected_type == 'freehand' }">
             5
           </li>
-          <li @click="select_tool_props('10')">
+          <li @click="select_tool_props('10')" :class="{ 'active': width == '10' && selected_type == 'freehand' }">
             10
           </li>
-          <li @click="select_tool_props('20')">
+          <li @click="select_tool_props('20')" :class="{ 'active': width == '20' && selected_type == 'freehand' }">
             20
           </li>
-          <li @click="select_tool_props('line')">
+          <li @click="select_tool_props('line')" :class="{ 'active': selected_type == 'line' }">
             <i class="fas fa-pencil-alt"></i>
           </li>
-          <li @click="select_tool_props('arrow')">
+          <li @click="select_tool_props('arrow')" :class="{ 'active': selected_type == 'arrow' }">
             <i class="fas fa-long-arrow-alt-up"></i>
           </li>
         </ul>
@@ -47,22 +47,22 @@
       >
         <i class="fas fa-map-pin"></i>
         <ul class="c-toolbar__nested" v-if="selected_tool == 'marker'" style="height:33px;top:0px">
-          <li @click="select_marker_type('marker')">
+          <li @click="select_marker_type('marker')" :class="{ 'active': selected_type == 'marker' }">
             <i class="fas fa-map-marker-alt"></i>
           </li>
-          <li @click="select_marker_type('image')">
+          <li @click="select_marker_type('image')" :class="{ 'active': selected_type == 'image' }">
             <i class="fas fa-image"></i>
           </li>
-          <li @click="select_marker_type('camera')">
+          <!-- <li @click="select_marker_type('camera')">
             <i class="fas fa-camera"></i>
-          </li>
+          </li> -->
         </ul>
       </li>
     </ul>
     <div class="c-toolbar is-color-picker">
       <p>
         <i class="fas fa-dot-circle" @click="open_color_picker" :style="{ 'color': color }"></i>
-        <input type="color" id="favcolor" name="favcolor" v-model="color" />
+        <input type="color" id="favcolor" name="favcolor" v-model="color" @change="update_color" />
       </p>
     </div>
   </div>
@@ -75,12 +75,8 @@
         selected_tool: null,
         selected_type: null,
         color: "#F6C",
+        width: -1,
       };
-    },
-    watch: {
-      color(val) {
-        this.update_color(val);
-      },
     },
 
     methods: {
@@ -90,7 +86,7 @@
       update_selection(tool) {
         this.selected_tool == tool ? (this.selected_tool = null) : (this.selected_tool = tool);
         if (this.selected_tool == "text") {
-          this.selected_tool = null;
+          this.selected_type = null;
           this.$emit("draw", { type: "text", color: this.color });
         }
       },
@@ -111,6 +107,7 @@
           this.tool_selected({ type: "arrow", color: this.color });
         } else {
           this.selected_type = "freehand";
+          this.width = type;
           this.tool_selected({ type: "freehand", width: type, color: this.color });
         }
       },

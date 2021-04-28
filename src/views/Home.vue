@@ -69,7 +69,7 @@
 
             break;
           case "line":
-            new L.Draw.Polyline(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
+            new L.Draw.Polyline(this.mapDiv, { shapeOptions: { color: this.color, opacity: 1 } }).enable();
 
             break;
           case "text":
@@ -353,10 +353,10 @@
             var myPopup = L.DomUtil.create("div");
 
             myPopup.innerHTML = `<div class='images'>
-                <button id="icon">Icon</button>
-                <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
-                <button id="camera-btn">Camera</button>
-                </div>`;
+                  <button id="icon">Icon</button>
+                  <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
+                  <button id="camera-btn">Camera</button>
+                  </div>`;
 
             this.popup = L.popup()
               .setLatLng(e.latlng)
@@ -601,7 +601,7 @@
         // this.mapDiv.off("click", action);
       },
       text_prompt() {
-        this.mapDiv.on("click ", (e) => {
+        let action = (e) => {
           if (this.selected_tool == "text") {
             var myPopup = L.DomUtil.create("div");
             myPopup.innerHTML =
@@ -624,9 +624,11 @@
                 marker.addTo(this.mapDiv);
               }
               this.mapDiv.closePopup();
+              this.mapDiv.off("click ", action);
             });
           }
-        });
+        };
+        this.mapDiv.on("click ", action);
       },
 
       start_drawing() {
