@@ -74,7 +74,7 @@
       return {
         selected_tool: null,
         selected_type: null,
-        color: "#F6C",
+        color: "#F62",
         width: -1,
       };
     },
