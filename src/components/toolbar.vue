@@ -74,7 +74,7 @@
       return {
         selected_tool: null,
         selected_type: null,
-        color: "#F62",
+        color: "#000",
         width: -1,
       };
     },
@@ -194,7 +194,14 @@
   }
   @media only screen and (max-width: 600px) {
     #favcolor {
-      // visibility: hidden;
+      visibility: visible;
+      width: 25px;
+      // display: none;
+    }
+    .is-color-picker {
+      background: transparent;
+    }
+    .fa-dot-circle {
       display: none;
     }
   }
