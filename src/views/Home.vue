@@ -48,6 +48,7 @@
         accessToken: "pk.eyJ1IjoidGVzdGVyMjM4Nzg2MjciLCJhIjoiY2tuenBoNXRjMDd3NDJwb2JoZTgwdXkyNCJ9.zhWEouASkv8bAjhZ7xGxAw",
         width: 8,
         color: "#fea254",
+        iconSize: [60, 60],
       };
     },
     components: {
@@ -610,14 +611,14 @@
           if (marker_type == "marker") {
             let starIcon = L.icon({
               iconUrl: require("../assets/star.png"),
-              iconSize: [60, 60], // size of the icon
+              iconSize: this.iconSize, // size of the icon
               iconAnchor: [50, 50], // point of the icon which will correspond to marker's location
               popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
             });
 
             var marker = new L.marker(e.latlng, { icon: starIcon }); //opacity may be set to zero
 
-            marker.addTo(this.mapDiv);
+            marker.addTo(this.drawnItems);
           }
 
           //FILE IMAGE MARKER

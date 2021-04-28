@@ -46,7 +46,7 @@
         @click="update_selection('marker')"
       >
         <i class="fas fa-map-pin"></i>
-        <ul class="c-toolbar__nested" v-if="selected_tool == 'marker'">
+        <ul class="c-toolbar__nested" v-if="selected_tool == 'marker'" style="height:33px;top:0px">
           <li @click="select_marker_type('marker')">
             <i class="fas fa-map-marker-alt"></i>
           </li>
@@ -151,9 +151,10 @@
       display: inline-flex;
       position: absolute;
       background: #3c3e42;
-      top: 0;
+      top: -5px;
       left: 100%;
-      height: 34px;
+      height: 35px;
+
       li {
         padding: 10px;
         cursor: pointer;
