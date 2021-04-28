@@ -107,6 +107,7 @@
       select_marker_type(type) {
         this.selected_type = type;
         this.$emit("add-marker", type);
+        // this.tool_selected({ type: "marker", shape: type });
       },
       select_tool_props(type) {
         if (type == "line") {
