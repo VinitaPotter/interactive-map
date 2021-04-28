@@ -21,32 +21,41 @@
       <li :class="{ 'active': selected_tool == 'text' }" @click="update_selection('text')">
         <i class="fab fa-amilia"></i>
       </li>
-      <li :class="{ 'active': selected_type == 'line' || selected_type == 'arrow' || selected_type == 'freehand' }" @click="update_selection('pen')">
+      <li
+        :class="{ 'active': selected_type == 'line' || selected_type == 'arrow' || selected_type == 'freehand' }"
+        @click="
+          active_toolbar = 'pen';
+          update_selection('pen');
+        "
+      >
         <i class="fas fa-pen"></i>
-        <ul class="c-toolbar__nested" v-if="selected_tool == 'pen'">
-          <li @click="select_tool_props('5')">
+        <ul class="c-toolbar__nested" v-if="active_toolbar == 'pen'">
+          <li @click.stop="select_tool_props('5')">
             5
           </li>
-          <li @click="select_tool_props('10')">
+          <li @click.stop="select_tool_props('10')">
             10
           </li>
-          <li @click="select_tool_props('20')">
+          <li @click.stop="select_tool_props('20')">
             20
           </li>
-          <li @click="select_tool_props('line')">
+          <li @click.stop="select_tool_props('line')">
             <i class="fas fa-pencil-alt"></i>
           </li>
-          <li @click="select_tool_props('arrow')">
+          <li @click.stop="select_tool_props('arrow')">
             <i class="fas fa-long-arrow-alt-up"></i>
           </li>
         </ul>
       </li>
       <li
         :class="{ 'active': selected_type == 'marker' || selected_type == 'image' || selected_type == 'camera' }"
-        @click="update_selection('marker')"
+        @click="
+          active_toolbar = 'marker';
+          update_selection('marker');
+        "
       >
         <i class="fas fa-map-pin"></i>
-        <ul class="c-toolbar__nested" v-if="selected_tool == 'marker'" style="height:33px;top:0px">
+        <ul class="c-toolbar__nested" v-if="active_toolbar == 'marker'" style="height:33px;top:0px">
           <li @click="select_marker_type('marker')">
             <i class="fas fa-map-marker-alt"></i>
           </li>
@@ -74,7 +83,8 @@
       return {
         selected_tool: null,
         selected_type: null,
-        color: "#F6C8CC",
+        color: "#F6C",
+        active_toolbar: null,
       };
     },
     watch: {
@@ -88,18 +98,11 @@
         this.$emit("update-color", col);
       },
       update_selection(tool) {
-        // this.selected_type = null;
         this.selected_tool == tool ? (this.selected_tool = null) : (this.selected_tool = tool);
-        if (this.selected_tool == "text") {
-          this.$emit("draw", { type: "text", color: this.color });
-        }
-        // if (this.selected_tool == "polygon") {
-        //   this.$emit("draw", { type: "polygon", color: this.color });
-        // }
       },
       select_polygon_type(type) {
         this.selected_type = type;
-        this.$emit("draw", { type: type, color: this.color });
+        this.tool_selected({ type: type, color: this.color });
       },
       select_marker_type(type) {
         this.selected_type = type;
@@ -108,15 +111,23 @@
       select_tool_props(type) {
         if (type == "line") {
           this.selected_type = "line";
-          this.$emit("draw", { type: "line", color: this.color });
+          this.tool_selected({ type: "line", color: this.color });
+          // this.$emit("draw", { type: "line", color: this.color });
         } else if (type == "arrow") {
           this.selected_type = "arrow";
-          this.$emit("draw", { type: "arrow", color: this.color });
+          this.tool_selected({ type: "arrow", color: this.color });
+          // this.$emit("draw", { type: "arrow", color: this.color });
         } else {
           this.selected_type = "freehand";
-
-          this.$emit("draw", { type: "freehand", width: type, color: this.color });
+          this.tool_selected({ type: "freehand", width: type, color: this.color });
+          // this.$emit("draw", { type: "freehand", width: type, color: this.color });
         }
+        this.active_toolbar = null;
+      },
+      tool_selected(payload) {
+        // this.$emit("draw", { type: "" });
+
+        this.$emit("draw", payload);
       },
       open_color_picker() {
         document.getElementById("favcolor").click();

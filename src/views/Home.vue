@@ -1,5 +1,6 @@
 <template>
   <div>
+    {{ selected_tool }}
     <toolbar @draw="trigger_toolbar($event)" @update-color="color = $event" @add-marker="add_marker"></toolbar>
     <div class="photo-capture" id="camera">
       <div class="frame">
@@ -60,6 +61,7 @@
     },
     methods: {
       trigger_toolbar(payload) {
+        console.log(payload);
         this.width = payload.width;
         this.color = payload.color;
         switch (payload.type) {
@@ -87,8 +89,18 @@
             new L.Draw.Polygon(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
 
             break;
-          default:
+          case "freehand":
             new L.Draw.Freeline(this.mapDiv).enable();
+            break;
+
+          default:
+            new L.Draw.Arrow(this.mapDiv).disable();
+            new L.Draw.Polyline(this.mapDiv, { shapeOptions: { color: this.color } }).disable();
+            new L.Draw.Text(this.mapDiv).disable();
+            new L.Draw.Circle(this.mapDiv, { shapeOptions: { color: this.color } }).disable();
+            new L.Draw.Rectangle(this.mapDiv, { shapeOptions: { color: this.color } }).disable();
+            new L.Draw.Polygon(this.mapDiv, { shapeOptions: { color: this.color } }).disable();
+            new L.Draw.Freeline(this.mapDiv).disable();
         }
       },
       setupLeafletMap: function() {
@@ -118,7 +130,7 @@
         });
         L.Draw.Freeline = L.Draw.Polyline.extend({
           options: {
-            repeatMode: false,
+            repeatMode: true,
             showArea: false,
           },
           initialize: function(map, options) {
@@ -550,6 +562,7 @@
               player.srcObject.getVideoTracks().forEach((track) => track.stop());
             });
           }
+          clicked_at = null;
         });
       },
 
@@ -609,13 +622,12 @@
               "opacity": 0.9,
               "weight": this.width,
             });
-          } else {
-            this.stop_freehand();
           }
         }
       },
       stop_freehand() {
         if (this.selected_tool == "freeline") {
+          console.log("stop freehand");
           this.drawing = false;
           this.mapDiv.dragging.enable();
           this.mapDiv.touchZoom.enable();
