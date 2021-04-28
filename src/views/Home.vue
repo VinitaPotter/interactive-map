@@ -66,36 +66,29 @@
           case "arrow":
             new L.Draw.Arrow(this.mapDiv).enable();
 
-            // document.querySelector(".leaflet-draw-draw-arrow").click();
             break;
           case "line":
             new L.Draw.Polyline(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
 
-            // document.querySelector(".leaflet-draw-draw-polyline").click();
             break;
           case "text":
             new L.Draw.Text(this.mapDiv).enable();
 
-            // document.querySelector(".leaflet-draw-draw-text").click();
             break;
           case "circle":
             new L.Draw.Circle(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
 
-            // document.querySelector(".leaflet-draw-draw-circle").click();
             break;
           case "rectangle":
             new L.Draw.Rectangle(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
 
-            // document.querySelector(".leaflet-draw-draw-rectangle").click();
             break;
           case "polygon":
             new L.Draw.Polygon(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
 
-            // document.querySelector(".leaflet-draw-draw-polygon").click();
             break;
           default:
             new L.Draw.Freeline(this.mapDiv).enable();
-          // document.querySelector(".leaflet-draw-draw-freeline").click();
         }
       },
       setupLeafletMap: function() {
@@ -109,120 +102,6 @@
 
         this.drawnItems = new L.FeatureGroup();
         this.mapDiv.addLayer(this.drawnItems);
-
-        // L.drawLocal = {
-        //   draw: {
-        //     toolbar: {
-        //       // #TODO: this should be reorganized where actions are nested in actions
-        //       // ex: actions.undo  or actions.cancel
-        //       actions: {
-        //         title: "Cancel - your text-",
-        //         text: "- your text-",
-        //       },
-        //       finish: {
-        //         title: "- your text-",
-        //         text: "- your text-",
-        //       },
-        //       undo: {
-        //         title: "- your text-",
-        //         text: "- your text-",
-        //       },
-        //       buttons: {
-        //         polyline: "- your text-",
-        //         polygon: "- your text-",
-        //         rectangle: "- your text-",
-        //         circle: "- your text-",
-        //         marker: "- your text-",
-        //         circlemarker: "- your text-",
-        //       },
-        //     },
-        //     handlers: {
-        //       circle: {
-        //         tooltip: {
-        //           start: "- your text-",
-        //         },
-        //         radius: "- your text-",
-        //       },
-        //       circlemarker: {
-        //         tooltip: {
-        //           start: "- your text-.",
-        //         },
-        //       },
-        //       marker: {
-        //         tooltip: {
-        //           start: "- your text-.",
-        //         },
-        //       },
-        //       polygon: {
-        //         tooltip: {
-        //           start: "- your text-.",
-        //           cont: "- your text-.",
-        //           end: "- your text-.",
-        //         },
-        //       },
-        //       polyline: {
-        //         error: "<strong>Error:</strong> shape edges cannot cross!",
-        //         tooltip: {
-        //           start: "Click to start drawing line.",
-        //           cont: "Click to continue drawing line.",
-        //           end: "Click last point to finish line.",
-        //         },
-        //       },
-        //       rectangle: {
-        //         tooltip: {
-        //           start: "- your text-.",
-        //         },
-        //       },
-        //       simpleshape: {
-        //         tooltip: {
-        //           end: "Release mouse to finish drawing.",
-        //         },
-        //       },
-        //       arrow: {
-        //         tooltip: {
-        //           cont: "Release mouse to finish drawing.",
-        //         },
-        //       },
-        //     },
-        //   },
-        //   edit: {
-        //     toolbar: {
-        //       actions: {
-        //         save: {
-        //           title: "Save changes",
-        //           text: "Save",
-        //         },
-        //         cancel: {
-        //           title: "Cancel editing, discards all changes",
-        //           text: "Cancel",
-        //         },
-        //         clearAll: {
-        //           title: "Clear all layers",
-        //           text: "Clear All",
-        //         },
-        //       },
-        //       buttons: {
-        //         edit: "Edit layers",
-        //         editDisabled: "No layers to edit",
-        //         remove: "Delete layers",
-        //         removeDisabled: "No layers to delete",
-        //       },
-        //     },
-        //     handlers: {
-        //       edit: {
-        //         tooltip: {
-        //           text: "Drag handles or markers to edit features.",
-        //           subtext: "Click cancel to undo changes.",
-        //         },
-        //       },
-        //       remove: {
-        //         tooltip: {
-        //           text: "Click on a feature to remove.",
-        //         },
-        //       },
-        //     },
-        //   },
-        // };
 
         L.Draw.Text = L.Draw.Marker.extend({
           initialize: function(map, options) {
@@ -364,37 +243,7 @@
         });
 
         this.drawControl = new L.Control.Draw({
-          draw: {
-            polyline: {
-              shapeOptions: {
-                color: this.color,
-                weight: 10,
-              },
-            },
-            polygon: {
-              allowIntersection: false, // Restricts shapes to simple polygons
-              drawError: {
-                color: this.color, // Color the shape will turn when intersects
-                message: "<strong>Polygon draw does not allow intersections!<strong> (allowIntersection: false)", // Message that will show when intersect
-              },
-              shapeOptions: {
-                color: this.color,
-              },
-            },
-
-            rectangle: {
-              shapeOptions: {
-                clickable: true,
-                color: this.color,
-              },
-            },
-            circle: {
-              shapeOptions: {
-                clickable: true,
-                color: this.color,
-              },
-            },
-          },
+          draw: {},
           edit: {
             featureGroup: this.drawnItems,
           },
@@ -403,31 +252,21 @@
         this.mapDiv.addControl(this.drawControl);
 
         this.mapDiv.on(L.Draw.Event.DRAWSTART, (e) => {
-          console.log(e);
           this.selected_tool = e.layerType;
-          console.log(this.selected_tool);
         });
         this.mapDiv.on(L.Draw.Event.DRAWSTOP, (e) => {
           this.selected_tool = "";
         });
 
         this.mapDiv.on(L.Draw.Event.CREATED, (e) => {
-          console.log("mapdoc", this.mapDiv);
           this.e = null;
-
           var type = e.layerType,
             layer = e.layer;
 
           if (type === "marker") {
             layer.bindPopup("A popup!");
           }
-          if (type === "text") {
-            this.mapDiv.bindPopup("<p>Hello World</p>").openPopup();
-            // layer.bindPopup("A popup!");
-          }
-
           this.drawnItems.addLayer(layer);
-          console.log("srawnitme", this.drawnItems);
         });
 
         this.mapDiv.on("mouseup", (e) => {
@@ -439,7 +278,6 @@
       },
       onLocationFound(e) {
         var radius = e.accuracy;
-
         L.marker(e.latlng)
           .addTo(this.mapDiv)
           .bindPopup("You are within " + radius + " meters from this point")
@@ -455,20 +293,13 @@
       marker_promt() {
         this.mapDiv.on("click ", (e) => {
           if (this.selected_tool == "custommarker") {
-            // <img class='image' src='${require("../assets/star.png")}' alt=' /><img class='image' src='~@/assets/image.png' alt=' /><img class='image' src='~@/assets/camera.png' alt=' />
             var myPopup = L.DomUtil.create("div");
 
-            //   if (L.Browser.mobile) {
-            //     myPopup.innerHTML = `
-            //   <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
-            //  `;
-            // } else {
             myPopup.innerHTML = `<div class='images'>
             <button id="icon">Icon</button>
             <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
             <button id="camera-btn">Camera</button>
             </div>`;
-            // }
 
             this.popup = L.popup()
               .setLatLng(e.latlng)
@@ -641,8 +472,7 @@
                     popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
                   });
                   var marker = new L.marker(clicked_at.latlng, { icon: imageIcon }); //opacity may be set to zero
-                  marker.addTo(that.mapDiv);
-                  // that.mapDiv.closePopup();
+                  marker.addTo(that.drawnItems);
                 });
                 reader.readAsDataURL(fileList[0]);
               },
@@ -658,7 +488,6 @@
               return;
             }
             const camera = document.getElementById("camera");
-
             const player = document.getElementById("player");
             const canvas = document.getElementById("canvas");
             const context = canvas.getContext("2d");
@@ -706,7 +535,7 @@
               var marker = new L.marker(e.latlng, { icon: photIcon }); //opacity may be set to zero
               camera.classList.toggle("camera-active");
 
-              marker.addTo(this.mapDiv);
+              marker.addTo(this.drawnItems);
               this.mapDiv.closePopup();
 
               // Stop all video streams.
@@ -719,7 +548,6 @@
             });
           }
         });
-        // this.mapDiv.removeEventListener("click");
       },
 
       text_prompt() {
@@ -773,13 +601,11 @@
 
             this.line = L.polyline([]).addTo(this.drawnItems);
             this.line.addLatLng(this.e.latlng);
-            console.log(this.width);
             this.line.setStyle({
               "color": this.color,
               "opacity": 0.9,
               "weight": this.width,
             });
-            console.log("ADDED LINE");
           } else {
             this.stop_freehand();
           }
@@ -794,12 +620,10 @@
           this.mapDiv.scrollWheelZoom.enable();
           this.mapDiv.boxZoom.enable();
           this.mapDiv.keyboard.enable();
-          console.log("Closed line", this.line);
         }
       },
       drawLine(e) {
         if (this.drawing) {
-          console.log("drawing..");
           this.mapDiv.touchZoom.disable();
           this.mapDiv.dragging.disable();
           this.mapDiv.doubleClickZoom.disable();
@@ -848,9 +672,7 @@
           }
         });
         this.mapDiv.on("mouseup", (e) => {
-          console.log(this.polyline);
           if (this.selected_tool == "arrow") {
-            console.log(e);
             var decorator = L.polylineDecorator(this.polyline, {
               patterns: [
                 {
