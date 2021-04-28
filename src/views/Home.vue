@@ -1,6 +1,5 @@
 <template>
   <div>
-    {{ selected_tool }}
     <toolbar @draw="trigger_toolbar($event)" @update-color="color = $event" @add-marker="add_marker"></toolbar>
     <div class="photo-capture" id="camera">
       <div class="frame">
@@ -287,6 +286,19 @@
         });
 
         this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
+        this.mapDiv.on("zoomend", (e) => {
+          let currentZoom = this.mapDiv.getZoom();
+          let baseSize = 115;
+          let updatedSize = baseSize - currentZoom * 5;
+
+          Array.from(document.querySelectorAll(".my-div-icon")).forEach((el) => {
+            let height = el.firstElementChild.style.height;
+
+            el.firstElementChild.style.height = updatedSize + "px";
+            el.firstElementChild.style.width = updatedSize + "px";
+          });
+          // $("#mapContainer .my-div-icon").css({ "width": 200, "height": 200 });
+        });
       },
       onLocationFound(e) {
         var radius = e.accuracy;
@@ -308,10 +320,10 @@
             var myPopup = L.DomUtil.create("div");
 
             myPopup.innerHTML = `<div class='images'>
-              <button id="icon">Icon</button>
-              <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
-              <button id="camera-btn">Camera</button>
-              </div>`;
+                <button id="icon">Icon</button>
+                <input id="image" type="file" style="display: none;" accept=".jpg, .jpeg, .png" /><button for="image" id="img-btn">Image</button>
+                <button id="camera-btn">Camera</button>
+                </div>`;
 
             this.popup = L.popup()
               .setLatLng(e.latlng)
@@ -578,7 +590,10 @@
             //   popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
             // });
             let iconString = `<img class="img" src=${require("../assets/star.png")} alt/>`;
-            let starIcon = L.divIcon({ className: "my-div-icon", html: iconString });
+            let starIcon = L.divIcon({
+              className: "my-div-icon",
+              html: iconString,
+            });
             var marker = new L.marker(e.latlng, { icon: starIcon }); //opacity may be set to zero
             marker.addTo(this.drawnItems);
             // this.mapDiv.off("click", this.offMap);
@@ -587,30 +602,30 @@
           if (marker_type == "image") {
             // let clicked_at = e;
             let input = document.getElementById("image");
-
             input.click();
-            input.addEventListener(
-              "change",
-              (event1) => {
-                const fileList = input.files;
-                const reader = new FileReader();
-                let readfile = (event2) => {
-                  let img = event2.target.result;
-                  console.log({ img });
-                  let iconString = `<img class="img" src=${img} alt/>`;
-                  let imgIcon = L.divIcon({ className: "my-div-icon", html: iconString });
-                  var marker = new L.marker(e.latlng, { icon: imgIcon }); //opacity may be set to zero
-                  marker.addTo(this.drawnItems);
-                  reader.removeEventListener("load", readfile);
-                };
-                reader.addEventListener("load", readfile);
-                reader.readAsDataURL(fileList[0]);
-                input.removeEventListener("change", () => {
-                  console.log("removed");
+            let onchange = (event1) => {
+              const fileList = input.files;
+              const reader = new FileReader();
+              let readfile = (event2) => {
+                let img = event2.target.result;
+                console.log({ img });
+                let iconString = `<img class="img" src=${img} alt/>`;
+                let imgIcon = L.divIcon({
+                  className: "my-div-icon",
+                  html: iconString,
                 });
-              },
-              false
-            );
+                var marker = new L.marker(e.latlng, { icon: imgIcon }); //opacity may be set to zero
+                marker.addTo(this.drawnItems);
+                reader.removeEventListener("load", readfile);
+              };
+              reader.addEventListener("load", readfile);
+              reader.readAsDataURL(fileList[0]);
+              input.removeEventListener("change", () => {
+                console.log("removed");
+              });
+              input.removeEventListener("change", onchange);
+            };
+            input.addEventListener("change", onchange);
           }
           //CAMERA ICON
           if (marker_type == "camera") {
@@ -958,12 +973,12 @@
   }
 
   .my-div-icon {
-    // height: 4rem;
-    // width: 4rem;
+    height: 60px;
+    width: 60px;
     // background: blue;
   }
   .img {
-    height: 2rem;
-    width: 2rem;
+    height: 60px;
+    width: 60px;
   }
 </style>

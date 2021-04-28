@@ -1,5 +1,6 @@
 <template>
   <div>
+    {{ active_toolbar }}
     <ul class="c-toolbar">
       <li
         :class="{ 'active': selected_type == 'polygon' || selected_type == 'rectangle' || selected_type == 'circle' }"
@@ -21,41 +22,32 @@
       <li :class="{ 'active': selected_tool == 'text' }" @click="update_selection('text')">
         <i class="fab fa-amilia"></i>
       </li>
-      <li
-        :class="{ 'active': selected_type == 'line' || selected_type == 'arrow' || selected_type == 'freehand' }"
-        @click="
-          active_toolbar = 'pen';
-          update_selection('pen');
-        "
-      >
+      <li :class="{ 'active': selected_type == 'line' || selected_type == 'arrow' || selected_type == 'freehand' }" @click="update_selection('pen')">
         <i class="fas fa-pen"></i>
-        <ul class="c-toolbar__nested" v-if="active_toolbar == 'pen'">
-          <li @click.stop="select_tool_props('5')">
+        <ul class="c-toolbar__nested" v-if="selected_tool == 'pen'">
+          <li @click="select_tool_props('5')">
             5
           </li>
-          <li @click.stop="select_tool_props('10')">
+          <li @click="select_tool_props('10')">
             10
           </li>
-          <li @click.stop="select_tool_props('20')">
+          <li @click="select_tool_props('20')">
             20
           </li>
-          <li @click.stop="select_tool_props('line')">
+          <li @click="select_tool_props('line')">
             <i class="fas fa-pencil-alt"></i>
           </li>
-          <li @click.stop="select_tool_props('arrow')">
+          <li @click="select_tool_props('arrow')">
             <i class="fas fa-long-arrow-alt-up"></i>
           </li>
         </ul>
       </li>
       <li
         :class="{ 'active': selected_type == 'marker' || selected_type == 'image' || selected_type == 'camera' }"
-        @click="
-          active_toolbar = 'marker';
-          update_selection('marker');
-        "
+        @click="update_selection('marker')"
       >
         <i class="fas fa-map-pin"></i>
-        <ul class="c-toolbar__nested" v-if="active_toolbar == 'marker'" style="height:33px;top:0px">
+        <ul class="c-toolbar__nested" v-if="selected_tool == 'marker'" style="height:33px;top:0px">
           <li @click="select_marker_type('marker')">
             <i class="fas fa-map-marker-alt"></i>
           </li>
@@ -70,8 +62,8 @@
     </ul>
     <div class="c-toolbar is-color-picker">
       <p>
-        <input type="color" id="favcolor" name="favcolor" v-model="color" />
         <i class="fas fa-dot-circle" @click="open_color_picker" :style="{ 'color': color }"></i>
+        <input type="color" id="favcolor" name="favcolor" v-model="color" />
       </p>
     </div>
   </div>
@@ -107,27 +99,22 @@
       select_marker_type(type) {
         this.selected_type = type;
         this.$emit("add-marker", type);
-        // this.tool_selected({ type: "marker", shape: type });
+        this.active_toolbar = null;
       },
       select_tool_props(type) {
         if (type == "line") {
           this.selected_type = "line";
           this.tool_selected({ type: "line", color: this.color });
-          // this.$emit("draw", { type: "line", color: this.color });
         } else if (type == "arrow") {
           this.selected_type = "arrow";
           this.tool_selected({ type: "arrow", color: this.color });
-          // this.$emit("draw", { type: "arrow", color: this.color });
         } else {
           this.selected_type = "freehand";
           this.tool_selected({ type: "freehand", width: type, color: this.color });
-          // this.$emit("draw", { type: "freehand", width: type, color: this.color });
         }
         this.active_toolbar = null;
       },
       tool_selected(payload) {
-        // this.$emit("draw", { type: "" });
-
         this.$emit("draw", payload);
       },
       open_color_picker() {
@@ -141,7 +128,7 @@
   .c-toolbar {
     z-index: 1000000;
     list-style: none;
-    padding: 5px 0px !important;
+    padding: 0px !important;
     position: absolute;
     background: #3c3e42;
     color: white;
@@ -150,9 +137,10 @@
     top: 250px;
     width: 31px;
     li {
-      padding: 5px;
+      padding: 7px;
       cursor: pointer;
       position: relative;
+      margin: 1px;
       &:not(:last-of-type) {
         border-bottom: 1px solid #777;
       }
@@ -163,7 +151,7 @@
       display: inline-flex;
       position: absolute;
       background: #3c3e42;
-      top: -5px;
+      top: -1px;
       left: 100%;
       height: 35px;
 
@@ -180,10 +168,11 @@
       }
     }
     &.is-color-picker {
-      color: pink;
-      top: 400px;
+      color: "#da1";
+      top: 420px;
       width: 30px;
       padding: 3px 0px !important;
+      height: 25px;
       p {
         margin: auto;
         padding: 5px;
@@ -198,8 +187,8 @@
     transform: rotate(330deg);
   }
   #favcolor {
-    // visibility: hidden;
-    display: none;
+    visibility: hidden;
+    // display: none;
   }
   .active {
     background: teal;
