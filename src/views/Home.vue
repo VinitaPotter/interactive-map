@@ -439,13 +439,16 @@
           let clicked_at = e;
           //ICON MARKER
 
+          // https://stackoverflow.com/questions/46015066/leaflet-custom-icon-resize-on-zoom-performance-icon-vs-divicon
           if (marker_type == "marker") {
-            let starIcon = L.icon({
-              iconUrl: require("../assets/star.png"),
-              iconSize: this.iconSize, // size of the icon
-              iconAnchor: [50, 50], // point of the icon which will correspond to marker's location
-              popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
-            });
+            // let starIcon = L.icon({
+            //   iconUrl: require("../assets/star.png"),
+            //   iconSize: this.iconSize, // size of the icon
+            //   iconAnchor: [50, 50], // point of the icon which will correspond to marker's location
+            //   popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
+            // });
+            let iconString = `<img class="img" src=${require("../assets/star.png")} alt/>`;
+            let starIcon = L.divIcon({ className: "my-div-icon", html: iconString });
 
             var marker = new L.marker(e.latlng, { icon: starIcon }); //opacity may be set to zero
 
@@ -828,5 +831,15 @@
     font-weight: 600;
     font-size: 1.5rem;
     color: maroon;
+  }
+
+  .my-div-icon {
+    // height: 4rem;
+    // width: 4rem;
+    // background: blue;
+  }
+  .img {
+    height: 2rem;
+    width: 2rem;
   }
 </style>
