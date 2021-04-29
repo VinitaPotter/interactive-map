@@ -61,10 +61,10 @@
       </li>
     </ul>
     <div class="c-toolbar is-color-picker">
-      <p>
+      <!-- <p>
         <i class="fas fa-dot-circle" @click="open_color_picker" :style="{ 'color': color }"></i>
-      </p>
-      <input type="color" id="favcolor" name="favcolor" v-model="color" />
+      </p> -->
+      <input type="color" id="favcolor" name="favcolor" v-model="color" @change="update_color" />
     </div>
   </div>
 </template>
@@ -79,11 +79,11 @@
         width: -1,
       };
     },
-    watch: {
-      color(val) {
-        this.update_color(val);
-      },
-    },
+    // watch: {
+    //   color(val) {
+    //     this.update_color(val);
+    //   },
+    // },
 
     methods: {
       update_color(col) {
@@ -192,22 +192,25 @@
   .fa-long-arrow-alt-up {
     transform: rotate(330deg);
   }
+  // #favcolor {
+  //   visibility: hidden;
+  //   // display: none;
+  // }
+  // @media only screen and (max-width: 600px) {
+  //   #favcolor {
+  //     visibility: visible;
+  //     width: 25px;
+  //     // display: none;
+  //   }
+  //   .is-color-picker {
+  //     background: transparent;
+  //   }
+  //   .fa-dot-circle {
+  //     display: none;
+  //   }
+  // }
   #favcolor {
-    visibility: hidden;
-    // display: none;
-  }
-  @media only screen and (max-width: 600px) {
-    #favcolor {
-      visibility: visible;
-      width: 25px;
-      // display: none;
-    }
-    .is-color-picker {
-      background: transparent;
-    }
-    .fa-dot-circle {
-      display: none;
-    }
+    width: 25px;
   }
   .active {
     background: teal;
