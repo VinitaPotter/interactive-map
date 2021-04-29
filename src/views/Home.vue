@@ -380,8 +380,8 @@
         this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
         this.mapDiv.on("zoomend", (e) => {
           let currentZoom = this.mapDiv.getZoom();
-          let baseSize = 115;
-          let updatedSize = baseSize - currentZoom * 5;
+          let baseSize = 25;
+          let updatedSize = baseSize + currentZoom * 2;
 
           Array.from(document.querySelectorAll(".my-div-icon")).forEach((el) => {
             let height = el.firstElementChild.style.height;
