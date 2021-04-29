@@ -34,6 +34,14 @@
     name: "Map",
     data() {
       return {
+        arrowHandler: null,
+        lineHandler: null,
+        textHandler: null,
+        circleHandler: null,
+        rectangleHandler: null,
+        polygonHandler: null,
+        freehandHandler: null,
+
         drawControl: null,
         polyline: null,
         drawnItems: null,
@@ -57,49 +65,104 @@
 
     mounted() {
       this.setupLeafletMap();
+      this.arrowHandler = new L.Draw.Arrow(this.mapDiv);
+      this.lineHandler = new L.Draw.Polyline(this.mapDiv, { repeatMode: true, shapeOptions: { color: this.color, opacity: 1 } });
+      this.textHandler = new L.Draw.Text(this.mapDiv);
+      this.circleHandler = new L.Draw.Circle(this.mapDiv, { repeatMode: true, shapeOptions: { color: this.color } });
+      this.rectangleHandler = new L.Draw.Rectangle(this.mapDiv, { repeatMode: true, shapeOptions: { color: this.color } });
+      this.polygonHandler = new L.Draw.Polygon(this.mapDiv, { repeatMode: true, shapeOptions: { color: this.color } });
+      this.freehandHandler = new L.Draw.Freeline(this.mapDiv);
     },
     methods: {
       trigger_toolbar(payload) {
         console.log(payload);
         this.width = payload.width;
         this.color = payload.color;
+        console.log("rect", this.rectangleHandler);
+
         switch (payload.type) {
           case "arrow":
-            new L.Draw.Arrow(this.mapDiv).enable();
-
+            this.lineHandler.disable();
+            this.textHandler.disable();
+            this.circleHandler.disable();
+            this.rectangleHandler.disable();
+            this.polygonHandler.disable();
+            this.freehandHandler.disable();
+            this.arrowHandler.enable();
             break;
           case "line":
-            new L.Draw.Polyline(this.mapDiv, { shapeOptions: { color: this.color, opacity: 1 } }).enable();
+            this.arrowHandler.disable();
+            this.textHandler.disable();
+            this.circleHandler.disable();
+            this.rectangleHandler.disable();
+            this.polygonHandler.disable();
+            this.freehandHandler.disable();
 
+            this.lineHandler.options.shapeOptions.color = this.color;
+            this.lineHandler.enable();
             break;
           case "text":
-            new L.Draw.Text(this.mapDiv).enable();
+            this.arrowHandler.disable();
+            this.lineHandler.disable();
+            this.circleHandler.disable();
+            this.rectangleHandler.disable();
+            this.polygonHandler.disable();
+            this.freehandHandler.disable();
 
+            this.textHandler.enable();
             break;
           case "circle":
-            new L.Draw.Circle(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
+            this.arrowHandler.disable();
+            this.lineHandler.disable();
+            this.textHandler.disable();
+            this.rectangleHandler.disable();
+            this.polygonHandler.disable();
+            this.freehandHandler.disable();
 
+            this.circleHandler.options.shapeOptions.color = this.color;
+            this.circleHandler.enable();
             break;
           case "rectangle":
-            new L.Draw.Rectangle(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
+            this.arrowHandler.disable();
+            this.lineHandler.disable();
+            this.textHandler.disable();
+            this.circleHandler.disable();
+            this.polygonHandler.disable();
+            this.freehandHandler.disable();
 
+            this.rectangleHandler.options.shapeOptions.color = this.color;
+            this.rectangleHandler.enable();
             break;
           case "polygon":
-            new L.Draw.Polygon(this.mapDiv, { shapeOptions: { color: this.color } }).enable();
+            this.arrowHandler.disable();
+            this.lineHandler.disable();
+            this.textHandler.disable();
+            this.circleHandler.disable();
+            this.rectangleHandler.disable();
+            this.freehandHandler.disable();
 
+            this.polygonHandler.options.shapeOptions.color = this.color;
+            this.polygonHandler.enable();
             break;
           case "freehand":
-            new L.Draw.Freeline(this.mapDiv).enable();
+            this.arrowHandler.disable();
+            this.lineHandler.disable();
+            this.textHandler.disable();
+            this.circleHandler.disable();
+            this.rectangleHandler.disable();
+            this.polygonHandler.disable();
+
+            this.freehandHandler.enable();
             break;
 
           default:
-            new L.Draw.Arrow(this.mapDiv).disable();
-            new L.Draw.Polyline(this.mapDiv, { shapeOptions: { color: this.color } }).disable();
-            new L.Draw.Text(this.mapDiv).disable();
-            new L.Draw.Circle(this.mapDiv, { shapeOptions: { color: this.color } }).disable();
-            new L.Draw.Rectangle(this.mapDiv, { shapeOptions: { color: this.color } }).disable();
-            new L.Draw.Polygon(this.mapDiv, { shapeOptions: { color: this.color } }).disable();
-            new L.Draw.Freeline(this.mapDiv).disable();
+            this.arrowHandler.disable();
+            this.lineHandler.disable();
+            this.textHandler.disable();
+            this.circleHandler.disable();
+            this.rectangleHandler.disable();
+            this.polygonHandler.disable();
+            this.freehandHandler.disable();
         }
       },
       setupLeafletMap: function() {
