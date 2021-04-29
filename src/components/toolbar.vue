@@ -1,5 +1,6 @@
 <template>
   <div>
+    {{ selected_type }}
     <ul class="c-toolbar">
       <li
         :class="{ 'active': selected_type == 'polygon' || selected_type == 'rectangle' || selected_type == 'circle' }"
@@ -87,6 +88,9 @@
     methods: {
       update_color(col) {
         this.$emit("update-color", col);
+        if (this.selected_type != "freeline") {
+          this.$emit("draw", { type: this.selected_type, color: this.color });
+        }
       },
       update_selection(tool) {
         this.selected_tool == tool ? (this.selected_tool = null) : (this.selected_tool = tool);
