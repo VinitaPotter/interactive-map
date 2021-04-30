@@ -771,10 +771,8 @@
         };
       },
       draw_arrow() {
-        console.log("drawing arrow");
         let pointA;
-
-        this.mapDiv.on("mousedown", (e) => {
+        let arrowfn = (e) => {
           if (this.selected_tool == "arrow") {
             this.mapDiv.touchZoom.disable();
             this.mapDiv.dragging.disable();
@@ -790,7 +788,9 @@
               "weight": 2,
             });
           }
-        });
+        };
+
+        this.mapDiv.on("mousedown", arrowfn);
         this.mapDiv.on("mousemove", (e) => {
           if (this.selected_tool == "arrow" && this.polyline) {
             this.polyline.setLatLngs([pointA, e.latlng]);
@@ -822,6 +822,7 @@
             this.polyline = null;
           }
         });
+        this.mapDiv.on("dblclick", (e) => this.mapDiv.off("mousedown", arrowfn));
       },
     },
   };

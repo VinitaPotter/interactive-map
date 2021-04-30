@@ -173,11 +173,11 @@
       }
     }
     &.is-color-picker {
-      color: "#da1";
+      // color: "#da1";
       top: 420px;
-      width: 30px;
-      padding: 3px 0px !important;
-      height: 25px;
+      // width: 30px;
+      // padding: 3px 0px !important;
+      // height: 25px;
       p {
         margin: auto;
         padding: 5px;
@@ -210,6 +210,8 @@
   // }
   #favcolor {
     width: 25px;
+    padding: 2px;
+    border-radius: 7px;
   }
   .active {
     background: teal;
