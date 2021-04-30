@@ -1,6 +1,5 @@
 <template>
   <div>
-    {{ selected_type }}
     <ul class="c-toolbar">
       <li
         :class="{ 'active': selected_type == 'polygon' || selected_type == 'rectangle' || selected_type == 'circle' }"

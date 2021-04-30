@@ -75,10 +75,8 @@
     },
     methods: {
       trigger_toolbar(payload) {
-        console.log(payload);
         this.width = payload.width;
         this.color = payload.color;
-        console.log("rect", this.rectangleHandler);
 
         switch (payload.type) {
           case "arrow":
@@ -336,13 +334,13 @@
             },
             rectangle: {
               shapeOptions: {
-                clickable: true,
+                // clickable: true,
                 color: "#ff0",
               },
             },
             circle: {
               shapeOptions: {
-                clickable: true,
+                // clickable: true,
                 color: "#ff0",
               },
             },
@@ -389,11 +387,12 @@
             el.firstElementChild.style.height = updatedSize + "px";
             el.firstElementChild.style.width = updatedSize + "px";
           });
-          // $("#mapContainer .my-div-icon").css({ "width": 200, "height": 200 });
         });
-        this.mapDiv.on("keypress", (e) => {
-          // new L.EditToolbar.Edit(this.drawnItems).disable();
-          // console.log("edit", L.EditToolbar.Edit.save());
+        this.mapDiv.on("dblclick", (e) => {
+          if (this.rectangleHandler.enabled() || this.circleHandler.enabled()) {
+            this.circleHandler.disable();
+            this.rectangleHandler.disable();
+          }
         });
       },
       onLocationFound(e) {
