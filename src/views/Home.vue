@@ -1,5 +1,6 @@
 <template>
   <div>
+    {{ selected_tool }}
     <toolbar @draw="trigger_toolbar($event)" @update-color="color = $event" @add-marker="add_marker"></toolbar>
     <div class="photo-capture" id="camera">
       <div class="frame">
@@ -57,6 +58,21 @@
         width: 8,
         color: "#fea254",
         iconSize: [60, 60],
+        draw: (e) => {
+          this.e = null;
+          this.e = e;
+          if (!this.drawing) {
+            this.drawing = true;
+
+            this.line = L.polyline([]).addTo(this.drawnItems);
+            this.line.addLatLng(this.e.latlng);
+            this.line.setStyle({
+              "color": this.color,
+              "opacity": 0.9,
+              "weight": this.width,
+            });
+          }
+        },
       };
     },
     components: {
@@ -174,6 +190,7 @@
 
         this.drawnItems = new L.FeatureGroup();
         this.mapDiv.addLayer(this.drawnItems);
+        this.mapDiv.doubleClickZoom.disable();
 
         L.Draw.Text = L.Draw.Marker.extend({
           initialize: function(map, options) {
@@ -190,7 +207,7 @@
         });
         L.Draw.Freeline = L.Draw.Polyline.extend({
           options: {
-            repeatMode: true,
+            // repeatMode: true,
             showArea: false,
           },
           initialize: function(map, options) {
@@ -222,9 +239,9 @@
           },
           completeShape: function() {
             this.disable();
-            if (this.options.repeatMode) {
-              this.enable();
-            }
+            // if (this.options.repeatMode) {
+            //   this.enable();
+            // }
           },
         });
         L.Draw.Arrow = L.Draw.Marker.extend({
@@ -370,12 +387,6 @@
           this.drawnItems.addLayer(layer);
         });
 
-        this.mapDiv.on("mouseup", (e) => {
-          this.e = null;
-          this.stop_freehand();
-        });
-
-        this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
         this.mapDiv.on("zoomend", (e) => {
           let currentZoom = this.mapDiv.getZoom();
           let baseSize = 25;
@@ -694,52 +705,53 @@
       },
 
       start_drawing() {
-        if (L.Browser.mobile) {
-          this.mapDiv.on("touchstart", (e) => {
-            this.e = null;
-            this.e = e;
-            this.freehand_draw();
-          });
-        } else {
-          this.mapDiv.on("mousedown", (e) => {
-            this.e = null;
-            this.e = e;
-            this.freehand_draw();
-          });
-        }
-      },
-      freehand_draw(e) {
-        if (this.selected_tool == "freeline") {
-          if (!this.drawing) {
-            this.drawing = true;
+        // if (this.selected_tool == "freeline") {
+        // if (L.Browser.mobile) {
+        //   this.mapDiv.on("touchstart", (e) => {
+        //     this.e = null;
+        //     this.e = e;
+        //     if (!this.drawing) {
+        //       this.drawing = true;
 
-            this.line = L.polyline([]).addTo(this.drawnItems);
-            this.line.addLatLng(this.e.latlng);
-            this.line.setStyle({
-              "color": this.color,
-              "opacity": 0.9,
-              "weight": this.width,
-            });
-          }
-        }
-      },
-      stop_freehand() {
-        if (this.selected_tool == "freeline") {
-          console.log("stop freehand");
+        //       this.line = L.polyline([]).addTo(this.drawnItems);
+        //       this.line.addLatLng(this.e.latlng);
+        //       this.line.setStyle({
+        //         "color": this.color,
+        //         "opacity": 0.9,
+        //         "weight": this.width,
+        //       });
+        //     }
+        //   });
+        // } else {
+
+        this.mapDiv.on("mousedown touchstart", this.draw);
+
+        this.mapDiv.on("mouseup", (e) => {
+          this.e = null;
           this.drawing = false;
           this.mapDiv.dragging.enable();
           this.mapDiv.touchZoom.enable();
-          this.mapDiv.doubleClickZoom.enable();
+          // this.mapDiv.doubleClickZoom.enable();
           this.mapDiv.scrollWheelZoom.enable();
           this.mapDiv.boxZoom.enable();
           this.mapDiv.keyboard.enable();
-        }
+        });
+        this.mapDiv.on("mousemove", this.throttle(this.drawLine, 25));
+        this.mapDiv.on("dblclick", (e) => {
+          // this.mapDiv.doubleClickZoom.disable();
+          this.freehandHandler.disable();
+          this.selected_tool = "";
+          // setTimeout(() => {
+          //   this.mapDiv.doubleClickZoom.enable();
+          // }, 100);
+        });
       },
+
       drawLine(e) {
-        if (this.drawing) {
+        if (this.drawing && this.selected_tool == "freeline") {
           this.mapDiv.touchZoom.disable();
           this.mapDiv.dragging.disable();
-          this.mapDiv.doubleClickZoom.disable();
+          // this.mapDiv.doubleClickZoom.disable();
           this.mapDiv.scrollWheelZoom.disable();
           this.mapDiv.boxZoom.disable();
           this.mapDiv.keyboard.disable();
@@ -766,7 +778,7 @@
           if (this.selected_tool == "arrow") {
             this.mapDiv.touchZoom.disable();
             this.mapDiv.dragging.disable();
-            this.mapDiv.doubleClickZoom.disable();
+            // this.mapDiv.doubleClickZoom.disable();
             this.mapDiv.scrollWheelZoom.disable();
             this.mapDiv.boxZoom.disable();
             this.mapDiv.keyboard.disable();
@@ -801,7 +813,7 @@
             }).addTo(this.drawnItems);
             this.mapDiv.touchZoom.enable();
             this.mapDiv.dragging.enable();
-            this.mapDiv.doubleClickZoom.enable();
+            // this.mapDiv.doubleClickZoom.enable();
             this.mapDiv.scrollWheelZoom.enable();
             this.mapDiv.boxZoom.enable();
             this.mapDiv.keyboard.enable();
